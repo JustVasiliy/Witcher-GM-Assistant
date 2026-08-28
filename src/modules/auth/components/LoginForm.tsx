@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, FieldError, Input } from "@/core/ui";
 import { login as loginAction } from "../actions";
 import { LoginSchema, type LoginInput } from "../schemas";
-import { Field, Form, Title } from "./AuthForm.styles";
+import { Field, FooterLink, FooterText, Form, Title } from "./AuthForm.styles";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
@@ -63,6 +63,9 @@ export function LoginForm() {
           {isPending ? "Logging in..." : "Log in"}
         </Button>
       </Form>
+      <FooterText>
+        Don&apos;t have an account? <FooterLink href="/register">Sign up</FooterLink>
+      </FooterText>
     </Card>
   );
 }

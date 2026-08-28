@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, FieldError, Input } from "@/core/ui";
 import { register as registerAction } from "../actions";
 import { RegisterSchema, type RegisterInput } from "../schemas";
-import { Field, Form, Title } from "./AuthForm.styles";
+import { Field, FooterLink, FooterText, Form, Title } from "./AuthForm.styles";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(
@@ -78,6 +78,9 @@ export function RegisterForm() {
           {isPending ? "Creating account..." : "Sign up"}
         </Button>
       </Form>
+      <FooterText>
+        Already have an account? <FooterLink href="/login">Log in</FooterLink>
+      </FooterText>
     </Card>
   );
 }
