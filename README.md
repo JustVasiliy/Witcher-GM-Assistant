@@ -1,6 +1,6 @@
 # Witcher GM Assistant
 
-A web app that helps Game Masters run tabletop sessions of *The Witcher*
+A web app that helps Game Masters run tabletop sessions of _The Witcher_
 TTRPG: a bestiary/NPC database, an interactive combat tracker (HP, Stamina,
 statuses, injuries), an initiative tracker with round counter, rules cheat
 sheets, and GM notes — all behind user registration/login.
@@ -32,14 +32,26 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
+## Setup
+
+1. Copy `.env.example` to `.env` and fill in real values for `DATABASE_URL`
+   and `AUTH_SECRET`.
+2. Run `pnpm install` — this also runs `prisma generate` via the
+   `postinstall` script.
+3. Apply the database schema: `pnpm exec prisma migrate deploy` (or
+   `pnpm exec prisma migrate dev` for local development).
+4. Start the dev server: `pnpm dev`.
+
 ## Scripts
 
-| Command      | Description                       |
-| ------------ | ---------------------------------- |
-| `pnpm dev`   | Start the dev server               |
-| `pnpm build` | Build for production               |
-| `pnpm start` | Run the production build           |
-| `pnpm lint`  | Lint the codebase                  |
+| Command       | Description               |
+| ------------- | -------------------------- |
+| `pnpm dev`    | Start the dev server      |
+| `pnpm build`  | Build for production      |
+| `pnpm start`  | Run the production build  |
+| `pnpm lint`   | Lint the codebase         |
+| `pnpm format` | Format the codebase       |
+| `pnpm test`   | Run the test suite        |
 
 ## Project Structure
 

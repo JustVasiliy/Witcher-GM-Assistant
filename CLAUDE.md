@@ -4,8 +4,8 @@
 
 ## Project Overview
 
-A web application that helps Game Masters run tabletop sessions of *The
-Witcher* TTRPG. Users register and log in, then manage a bestiary of
+A web application that helps Game Masters run tabletop sessions of _The
+Witcher_ TTRPG. Users register and log in, then manage a bestiary of
 monsters/NPCs, run interactive NPC lists during combat (HP, Stamina,
 statuses, injuries), track initiative order and round count, consult rules
 cheat sheets, and keep freeform GM notes.
