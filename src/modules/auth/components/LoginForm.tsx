@@ -64,7 +64,8 @@ export function LoginForm() {
         </Button>
       </Form>
       <FooterText>
-        Don&apos;t have an account? <FooterLink href="/register">Sign up</FooterLink>
+        Don&apos;t have an account?{" "}
+        <FooterLink href="/register">Sign up</FooterLink>
       </FooterText>
     </Card>
   );
