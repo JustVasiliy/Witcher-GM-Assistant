@@ -44,14 +44,14 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## Scripts
 
-| Command       | Description               |
-| ------------- | -------------------------- |
-| `pnpm dev`    | Start the dev server      |
-| `pnpm build`  | Build for production      |
-| `pnpm start`  | Run the production build  |
-| `pnpm lint`   | Lint the codebase         |
-| `pnpm format` | Format the codebase       |
-| `pnpm test`   | Run the test suite        |
+| Command       | Description              |
+| ------------- | ------------------------ |
+| `pnpm dev`    | Start the dev server     |
+| `pnpm build`  | Build for production     |
+| `pnpm start`  | Run the production build |
+| `pnpm lint`   | Lint the codebase        |
+| `pnpm format` | Format the codebase      |
+| `pnpm test`   | Run the test suite       |
 
 ## Project Structure
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import styled from "styled-components";
+import { Card } from "@/core/ui";
 
 export const Form = styled.form`
   display: flex;
@@ -36,4 +37,9 @@ export const FooterText = styled.p`
 export const FooterLink = styled(Link)`
   color: ${({ theme }) => theme.colors.accent};
   text-decoration: underline;
+`;
+
+export const CenteredCard = styled(Card)`
+  max-width: 24rem;
+  margin: ${({ theme }) => theme.spacing.lg} auto;
 `;
