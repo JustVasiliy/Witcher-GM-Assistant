@@ -3,10 +3,17 @@
 import { startTransition, useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Card, FieldError, Input } from "@/core/ui";
+import { Button, FieldError, Input } from "@/core/ui";
 import { login as loginAction } from "../actions";
 import { LoginSchema, type LoginInput } from "../schemas";
-import { Field, FooterLink, FooterText, Form, Title } from "./AuthForm.styles";
+import {
+  CenteredCard,
+  Field,
+  FooterLink,
+  FooterText,
+  Form,
+  Title,
+} from "./AuthForm.styles";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, undefined);
@@ -26,7 +33,7 @@ export function LoginForm() {
   });
 
   return (
-    <Card>
+    <CenteredCard>
       <Title>Log in</Title>
       <Form onSubmit={onSubmit} noValidate method="post">
         <Field>
@@ -67,6 +74,6 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <FooterLink href="/register">Sign up</FooterLink>
       </FooterText>
-    </Card>
+    </CenteredCard>
   );
 }

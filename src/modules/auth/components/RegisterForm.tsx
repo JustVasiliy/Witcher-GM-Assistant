@@ -3,10 +3,17 @@
 import { startTransition, useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Card, FieldError, Input } from "@/core/ui";
+import { Button, FieldError, Input } from "@/core/ui";
 import { register as registerAction } from "../actions";
 import { RegisterSchema, type RegisterInput } from "../schemas";
-import { Field, FooterLink, FooterText, Form, Title } from "./AuthForm.styles";
+import {
+  CenteredCard,
+  Field,
+  FooterLink,
+  FooterText,
+  Form,
+  Title,
+} from "./AuthForm.styles";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(
@@ -30,7 +37,7 @@ export function RegisterForm() {
   });
 
   return (
-    <Card>
+    <CenteredCard>
       <Title>Create your account</Title>
       <Form onSubmit={onSubmit} noValidate method="post">
         <Field>
@@ -81,6 +88,6 @@ export function RegisterForm() {
       <FooterText>
         Already have an account? <FooterLink href="/login">Log in</FooterLink>
       </FooterText>
-    </Card>
+    </CenteredCard>
   );
 }
