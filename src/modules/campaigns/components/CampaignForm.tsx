@@ -3,6 +3,7 @@
 import { startTransition, useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
 import type { Campaign } from "@/generated/prisma/client";
 import { Button, FieldError, Input } from "@/core/ui";
 import { createCampaign, updateCampaign } from "../actions";
@@ -22,11 +23,13 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
     register: registerField,
     handleSubmit,
     formState: { errors },
-  } = useForm<CampaignInput>({
+  } = useForm<z.input<typeof CampaignSchema>, unknown, CampaignInput>({
     resolver: zodResolver(CampaignSchema),
     defaultValues: {
       name: campaign?.name ?? "",
       description: campaign?.description ?? undefined,
+      imageUrl: campaign?.imageUrl ?? undefined,
+      playerCount: campaign?.playerCount ?? undefined,
     },
   });
 
@@ -34,6 +37,11 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
     const formData = new FormData();
     formData.set("name", data.name);
     formData.set("description", data.description ?? "");
+    formData.set("imageUrl", data.imageUrl ?? "");
+    formData.set(
+      "playerCount",
+      data.playerCount !== undefined ? String(data.playerCount) : "",
+    );
     startTransition(() => {
       formAction(formData);
     });
@@ -62,6 +70,33 @@ export function CampaignForm({ campaign }: CampaignFormProps) {
           />
           {errors.description && (
             <FieldError>{errors.description.message}</FieldError>
+          )}
+        </Field>
+        <Field>
+          <label htmlFor="imageUrl">Image URL</label>
+          <Input
+            id="imageUrl"
+            type="text"
+            placeholder="https://..."
+            aria-invalid={Boolean(errors.imageUrl)}
+            {...registerField("imageUrl")}
+          />
+          {errors.imageUrl && (
+            <FieldError>{errors.imageUrl.message}</FieldError>
+          )}
+        </Field>
+        <Field>
+          <label htmlFor="playerCount">Number of players</label>
+          <Input
+            id="playerCount"
+            type="number"
+            min={0}
+            max={99}
+            aria-invalid={Boolean(errors.playerCount)}
+            {...registerField("playerCount")}
+          />
+          {errors.playerCount && (
+            <FieldError>{errors.playerCount.message}</FieldError>
           )}
         </Field>
         {state?.message && <FieldError>{state.message}</FieldError>}
