@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/core/auth/auth";
-import { CampaignDetail, getCampaignById } from "@/modules/campaigns";
+import { getCampaignById, SessionForm } from "@/modules/campaigns";
 
-export default async function CampaignDetailPage({
+export default async function NewSessionPage({
   params,
-}: PageProps<"/campaigns/[id]">) {
+}: PageProps<"/campaigns/[id]/sessions/new">) {
   const { id } = await params;
   const session = await auth();
   const campaign = session?.user
@@ -15,5 +15,5 @@ export default async function CampaignDetailPage({
     notFound();
   }
 
-  return <CampaignDetail campaign={campaign} />;
+  return <SessionForm campaignId={campaign.id} />;
 }
