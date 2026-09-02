@@ -13,17 +13,18 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String
-  email         String     @unique
+  email         String       @unique
   emailVerified DateTime?
   image         String?
   password      String?
   accounts      Account[]
   sessions      Session[]
   campaigns     Campaign[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  customNpcs    CustomNpc[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Account {
@@ -88,4 +89,32 @@ model CampaignSession {
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
+}
+
+// Bestiary
+
+enum CreatureType {
+  HUMANOID
+  NECROPHAGE
+  SPECTER
+  BEAST
+  CURSED_ONE
+  HYBRID
+  INSECTOID
+  ELEMENTA
+  RELICT
+  OGROID
+  DRACONID
+  VAMPIRE
+}
+
+model CustomNpc {
+  id        String       @id @default(cuid())
+  userId    String
+  name      String
+  type      CreatureType
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
