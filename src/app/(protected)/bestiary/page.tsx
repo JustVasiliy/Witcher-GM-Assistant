@@ -3,6 +3,7 @@ import {
   BestiaryBrowser,
   CORE_CREATURES,
   listCustomNpcsForUser,
+  parseNpcDetails,
   type Creature,
 } from "@/modules/bestiary";
 
@@ -22,8 +23,10 @@ export default async function BestiaryPage() {
       name: npc.name,
       type: npc.type,
       source: "custom" as const,
+      details: parseNpcDetails(npc.details),
     })),
   ];
+  console.dir(creatures, { depth: null });
 
   return <BestiaryBrowser creatures={creatures} />;
 }
