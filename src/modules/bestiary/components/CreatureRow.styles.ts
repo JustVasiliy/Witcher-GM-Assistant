@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import styled from "styled-components";
 
 export const Row = styled.div<{ $custom: boolean }>`
@@ -69,8 +70,14 @@ export const Actions = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const Chevron = styled.span`
+export const Chevron = styled(Link)`
   color: ${({ theme }) => theme.colors.mutedForeground};
   font-size: 1.25rem;
   opacity: 0.5;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 1;
+    color: ${({ theme }) => theme.colors.accent};
+  }
 `;

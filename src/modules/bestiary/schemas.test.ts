@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  ArmorLocationsSchema,
+  HeaderSchema,
   NpcDetailsSchema,
   SKILL_NAMES,
   SKILL_TO_STAT,
@@ -41,7 +43,14 @@ const ghoulFixture: NpcDetailsInput = {
     recovery: 5,
     hp: 25,
     vigor: 0,
-    armor: 0,
+  },
+  armor: {
+    head: 0,
+    torso: 0,
+    rightHand: 0,
+    leftHand: 0,
+    rightLeg: 0,
+    leftLeg: 0,
   },
   attacks: [
     { name: "Claws", skill: "Melee", damage: "3d6", rof: 1 },
@@ -154,5 +163,51 @@ describe("SKILL_NAMES", () => {
 
   it("has no duplicate skill names", () => {
     expect(new Set(SKILL_NAMES).size).toBe(SKILL_NAMES.length);
+  });
+});
+
+describe("ArmorLocationsSchema", () => {
+  it("accepts all six body-part values", () => {
+    const result = ArmorLocationsSchema.safeParse({
+      head: 1,
+      torso: 2,
+      rightHand: 0,
+      leftHand: 0,
+      rightLeg: 3,
+      leftLeg: 3,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a negative value", () => {
+    const result = ArmorLocationsSchema.safeParse({
+      head: -1,
+      torso: 0,
+      rightHand: 0,
+      leftHand: 0,
+      rightLeg: 0,
+      leftLeg: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("HeaderSchema", () => {
+  it("accepts a name, threat rating, and bounty", () => {
+    const result = HeaderSchema.safeParse({
+      name: "Ghoul",
+      threatRating: { difficulty: "EASY", complexity: "DIFFICULT" },
+      bounty: 30,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects an empty name", () => {
+    const result = HeaderSchema.safeParse({
+      name: "",
+      threatRating: { difficulty: "EASY", complexity: "DIFFICULT" },
+      bounty: 30,
+    });
+    expect(result.success).toBe(false);
   });
 });

@@ -161,10 +161,27 @@ export const VitalStatsSchema = z.object({
   recovery: vitalValue("Recovery"),
   hp: vitalValue("HP"),
   vigor: vitalValue("Vigor"),
-  armor: vitalValue("Armor"),
 });
 export type VitalStats = z.infer<typeof VitalStatsSchema>;
 // Run/Leap/Encumbrance deliberately excluded — computed in utils.ts.
+
+// --- Armor, per body part -------------------------------------------------------
+
+const armorLocationValue = (label: string) =>
+  z
+    .number()
+    .int(`${label} must be a whole number.`)
+    .min(0, `${label} cannot be negative.`);
+
+export const ArmorLocationsSchema = z.object({
+  head: armorLocationValue("Head armor"),
+  torso: armorLocationValue("Torso armor"),
+  rightHand: armorLocationValue("Right hand armor"),
+  leftHand: armorLocationValue("Left hand armor"),
+  rightLeg: armorLocationValue("Right leg armor"),
+  leftLeg: armorLocationValue("Left leg armor"),
+});
+export type ArmorLocations = z.infer<typeof ArmorLocationsSchema>;
 
 // --- Attacks -------------------------------------------------------
 
@@ -279,6 +296,7 @@ export const NpcDetailsSchema = z.object({
   coreStats: CoreStatsSchema,
   skills: SkillValuesSchema.default({}),
   vitalStats: VitalStatsSchema,
+  armor: ArmorLocationsSchema.optional(),
   attacks: z.array(AttackSchema).default([]),
   abilities: z.array(AbilitySchema).default([]),
   weaknesses: z
@@ -294,6 +312,22 @@ export const NpcDetailsSchema = z.object({
   flavor: FlavorSchema.optional(),
 });
 export type NpcDetailsInput = z.infer<typeof NpcDetailsSchema>;
+
+// --- Header (name + threat + bounty, edited together as one card) -----------------
+
+export const HeaderSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required.")
+    .max(100, "Name must be 100 characters or fewer."),
+  threatRating: ThreatRatingSchema,
+  bounty: z
+    .number()
+    .int("Bounty must be a whole number.")
+    .min(0, "Bounty cannot be negative."),
+});
+export type HeaderInput = z.infer<typeof HeaderSchema>;
 
 // --- Safe parsing of the Prisma Json column -------------------------------------------------------
 
