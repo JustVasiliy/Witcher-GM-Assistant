@@ -16,6 +16,7 @@ import {
 } from "../../schemas";
 import type { Creature } from "../../types";
 import { computeSkillBase } from "../../utils";
+import { DiceRollModal } from "./DiceRollModal";
 import { EditableCard } from "./EditableCard";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
@@ -67,53 +68,75 @@ type SkillsCardProps = {
 
 export function SkillsCard({ creature }: SkillsCardProps) {
   const [query, setQuery] = useState("");
+  const [rolling, setRolling] = useState<{
+    skill: SkillName;
+    base: number;
+  } | null>(null);
   const defaults = buildDefaultNpcDetails();
   const coreStats = creature.details?.coreStats ?? defaults.coreStats;
   const skills = creature.details?.skills ?? defaults.skills;
   const visibleGroups = filterGroups(query);
 
   return (
-    <EditableCard
-      title="Skills"
-      view={
-        <div>
-          <SearchInputWrapper>
-            <Input
-              type="search"
-              placeholder="Search skills..."
-              aria-label="Search skills"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </SearchInputWrapper>
-          {visibleGroups.map((group) => (
-            <div key={group.stat}>
-              <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
-              {group.skills.map((skill) => (
-                <ReadRow key={skill}>
-                  <ReadLabel>{skill}</ReadLabel>
-                  <ReadValue>
-                    +{computeSkillBase(coreStats, skills, skill)}
-                    <DiceButton type="button" aria-label={`Roll ${skill}`}>
-                      &#127922;
-                    </DiceButton>
-                  </ReadValue>
-                </ReadRow>
-              ))}
-            </div>
-          ))}
-        </div>
-      }
-      renderEdit={({ cancel }) => (
-        <SkillsForm
-          creature={creature}
-          skills={skills}
-          query={query}
-          onQueryChange={setQuery}
-          onCancel={cancel}
+    <>
+      <EditableCard
+        title="Skills"
+        view={
+          <div>
+            <SearchInputWrapper>
+              <Input
+                type="search"
+                placeholder="Search skills..."
+                aria-label="Search skills"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </SearchInputWrapper>
+            {visibleGroups.map((group) => (
+              <div key={group.stat}>
+                <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
+                {group.skills.map((skill) => (
+                  <ReadRow key={skill}>
+                    <ReadLabel>{skill}</ReadLabel>
+                    <ReadValue>
+                      +{computeSkillBase(coreStats, skills, skill)}
+                      <DiceButton
+                        type="button"
+                        aria-label={`Roll ${skill}`}
+                        onClick={() =>
+                          setRolling({
+                            skill,
+                            base: computeSkillBase(coreStats, skills, skill),
+                          })
+                        }
+                      >
+                        &#127922;
+                      </DiceButton>
+                    </ReadValue>
+                  </ReadRow>
+                ))}
+              </div>
+            ))}
+          </div>
+        }
+        renderEdit={({ cancel }) => (
+          <SkillsForm
+            creature={creature}
+            skills={skills}
+            query={query}
+            onQueryChange={setQuery}
+            onCancel={cancel}
+          />
+        )}
+      />
+      {rolling && (
+        <DiceRollModal
+          label={rolling.skill}
+          base={rolling.base}
+          onClose={() => setRolling(null)}
         />
       )}
-    />
+    </>
   );
 }
 

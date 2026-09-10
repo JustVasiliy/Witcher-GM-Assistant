@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
+import { buildDefaultNpcDetails } from "../../npc-defaults";
 import { AttackSchema, SKILL_NAMES, type Attack } from "../../schemas";
 import type { Creature } from "../../types";
+import { computeSkillBase } from "../../utils";
+import { DiceRollModal } from "./DiceRollModal";
 import { EditableListCard } from "./EditableListCard";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { Field } from "./SharedCardFields.styles";
@@ -17,30 +21,56 @@ type AttacksCardProps = {
 
 export function AttacksCard({ creature }: AttacksCardProps) {
   const attacks = creature.details?.attacks ?? [];
+  const defaults = buildDefaultNpcDetails();
+  const coreStats = creature.details?.coreStats ?? defaults.coreStats;
+  const skills = creature.details?.skills ?? defaults.skills;
+  const [rolling, setRolling] = useState<{
+    label: string;
+    base: number;
+  } | null>(null);
 
   return (
-    <EditableListCard<Attack>
-      title="Attacks"
-      items={attacks}
-      emptyItem={EMPTY_ATTACK}
-      itemSchema={AttackSchema}
-      addLabel="+ Add Attack"
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
-      renderView={(attack) => (
-        <AttackRowGrid>
-          <span>{attack.name}</span>
-          <span>{attack.skill}</span>
-          <span>{attack.damage}</span>
-          <span>{attack.effect ?? "—"}</span>
-          <span>{attack.rof}</span>
-          <button type="button" aria-label={`Roll ${attack.name}`}>
-            &#127922;
-          </button>
-        </AttackRowGrid>
+    <>
+      <EditableListCard<Attack>
+        title="Attacks"
+        items={attacks}
+        emptyItem={EMPTY_ATTACK}
+        itemSchema={AttackSchema}
+        addLabel="+ Add Attack"
+        saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+        renderView={(attack) => (
+          <AttackRowGrid>
+            <span>{attack.name}</span>
+            <span>{attack.skill}</span>
+            <span>{attack.damage}</span>
+            <span>{attack.effect ?? "—"}</span>
+            <span>{attack.rof}</span>
+            <span>+{computeSkillBase(coreStats, skills, attack.skill)}</span>
+            <button
+              type="button"
+              aria-label={`Roll ${attack.name}`}
+              onClick={() =>
+                setRolling({
+                  label: attack.name || attack.skill,
+                  base: computeSkillBase(coreStats, skills, attack.skill),
+                })
+              }
+            >
+              &#127922;
+            </button>
+          </AttackRowGrid>
+        )}
+        renderEditRow={(index) => <AttackFields index={index} />}
+        onSave={(items) => saveNpcDetailsPatch(creature, { attacks: items })}
+      />
+      {rolling && (
+        <DiceRollModal
+          label={rolling.label}
+          base={rolling.base}
+          onClose={() => setRolling(null)}
+        />
       )}
-      renderEditRow={(index) => <AttackFields index={index} />}
-      onSave={(items) => saveNpcDetailsPatch(creature, { attacks: items })}
-    />
+    </>
   );
 }
 
