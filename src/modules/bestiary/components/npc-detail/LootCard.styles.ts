@@ -7,4 +7,5 @@ export const LootRowGrid = styled.div`
   grid-template-columns: 2fr 1fr;
   gap: ${({ theme }) => theme.spacing.sm};
   flex: 1;
+  color: ${({ theme }) => theme.colors.foreground};
 `;

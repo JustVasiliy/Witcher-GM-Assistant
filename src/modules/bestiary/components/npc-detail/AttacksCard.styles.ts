@@ -8,4 +8,5 @@ export const AttackRowGrid = styled.div`
   gap: ${({ theme }) => theme.spacing.sm};
   align-items: end;
   flex: 1;
+  color: ${({ theme }) => theme.colors.foreground};
 `;

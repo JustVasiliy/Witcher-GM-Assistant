@@ -6,7 +6,7 @@ import { FieldError, Input } from "@/core/ui";
 import type { Creature } from "../../types";
 import { EditableListCard } from "./EditableListCard";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
-import { Field } from "./SharedCardFields.styles";
+import { Field, ReadValue } from "./SharedCardFields.styles";
 
 const WeaknessItemSchema = z
   .string()
@@ -28,7 +28,7 @@ export function WeaknessesCard({ creature }: WeaknessesCardProps) {
       itemSchema={WeaknessItemSchema}
       addLabel="+ Add Weakness"
       saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
-      renderView={(weakness) => <span>{weakness}</span>}
+      renderView={(weakness) => <ReadValue>{weakness}</ReadValue>}
       renderEditRow={(index) => <WeaknessField index={index} />}
       onSave={(items) => saveNpcDetailsPatch(creature, { weaknesses: items })}
     />
