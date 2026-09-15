@@ -4,6 +4,9 @@ import { useId, useState, type FormEvent } from "react";
 import { Button, Input, Modal } from "@/core/ui";
 import { ActionsRow, Field } from "./SharedCardFields.styles";
 import { RollExpression, RollTotal } from "./DiceRollModal.styles";
+import { SideSelectModal } from "./SideSelectModal";
+
+export type RollSide = "attacking" | "defending";
 
 type DiceRollModalProps = {
   label: string;
@@ -12,6 +15,23 @@ type DiceRollModalProps = {
 };
 
 export function DiceRollModal({ label, base, onClose }: DiceRollModalProps) {
+  const [side, setSide] = useState<RollSide | null>(null);
+
+  if (!side) {
+    return <SideSelectModal onSelect={setSide} onClose={onClose} />;
+  }
+
+  return <RollForm label={label} base={base} side={side} onClose={onClose} />;
+}
+
+type RollFormProps = {
+  label: string;
+  base: number;
+  side: RollSide;
+  onClose: () => void;
+};
+
+function RollForm({ label, base, side, onClose }: RollFormProps) {
   const [rollResult, setRollResult] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const difficultyId = useId();
@@ -20,8 +40,22 @@ export function DiceRollModal({ label, base, onClose }: DiceRollModalProps) {
   const total =
     rollResult !== "" && !Number.isNaN(rollValue) ? base + rollValue : base;
 
+  const difficultyValue = Number(difficulty);
+  const isDifficultyValid =
+    difficulty !== "" && !Number.isNaN(difficultyValue);
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!isDifficultyValid) {
+      return;
+    }
+    const success =
+      side === "attacking"
+        ? total > difficultyValue
+        : total >= difficultyValue;
+    console.log(
+      `${label} roll: total ${total} vs difficulty ${difficultyValue} (${side}) -> ${success ? "Success" : "Failure"}`,
+    );
     onClose();
   }
 
@@ -51,7 +85,9 @@ export function DiceRollModal({ label, base, onClose }: DiceRollModalProps) {
           />
         </Field>
         <ActionsRow>
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={!isDifficultyValid}>
+            Submit
+          </Button>
         </ActionsRow>
       </form>
     </Modal>
