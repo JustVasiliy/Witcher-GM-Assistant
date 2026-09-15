@@ -1,16 +1,26 @@
 import type { CreatureType } from "@/generated/prisma/client";
+import type { NpcDetailsInput } from "./schemas";
 
 export type { CreatureType };
+
+export type NpcDetails = NpcDetailsInput;
 
 export type CoreCreature = {
   id: string;
   name: string;
   type: CreatureType;
+  details?: NpcDetails;
 };
 
 export type Creature =
   | (CoreCreature & { source: "core" })
-  | { id: string; name: string; type: CreatureType; source: "custom" };
+  | {
+      id: string;
+      name: string;
+      type: CreatureType;
+      source: "custom";
+      details?: NpcDetails;
+    };
 
 export const CREATURE_TYPES: CreatureType[] = [
   "HUMANOID",

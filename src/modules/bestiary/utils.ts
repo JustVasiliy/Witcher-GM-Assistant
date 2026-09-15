@@ -1,4 +1,10 @@
 import { CREATURE_TYPES, type Creature, type CreatureType } from "./types";
+import {
+  SKILL_TO_STAT,
+  type CoreStats,
+  type SkillName,
+  type SkillValues,
+} from "./schemas";
 
 export function filterCreatures(
   creatures: Creature[],
@@ -37,4 +43,29 @@ export function paginate<T>(items: T[], page: number, pageSize: number): T[] {
 
 export function pageCount(totalItems: number, pageSize: number): number {
   return Math.max(1, Math.ceil(totalItems / pageSize));
+}
+
+/** Run = SPD × 3. */
+export function computeRun(spd: number): number {
+  return spd * 3;
+}
+
+/** Leap = floor(Run / 5). */
+export function computeLeap(spd: number): number {
+  return Math.floor(computeRun(spd) / 5);
+}
+
+/** Encumbrance = BODY × 10. */
+export function computeEncumbrance(body: number): number {
+  return body * 10;
+}
+
+/** Base = stat + skill, for a given skill (untrained skills default to 0). */
+export function computeSkillBase(
+  coreStats: CoreStats,
+  skills: SkillValues,
+  skill: SkillName,
+): number {
+  const stat = SKILL_TO_STAT[skill];
+  return coreStats[stat] + (skills[skill] ?? 0);
 }
