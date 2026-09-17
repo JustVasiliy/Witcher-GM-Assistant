@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { formatRollMessage } from "./formatRollMessage";
 import type { RollHistoryEntry } from "./types";
 
-function buildEntry(overrides: Partial<RollHistoryEntry> = {}): RollHistoryEntry {
+function buildEntry(
+  overrides: Partial<RollHistoryEntry> = {},
+): RollHistoryEntry {
   return {
     id: "1",
     timestamp: 0,
@@ -47,7 +49,9 @@ describe("formatRollMessage", () => {
 
   it("formats a defending roll", () => {
     expect(
-      formatRollMessage(buildEntry({ side: "defending", total: 5, difficulty: 5 })),
+      formatRollMessage(
+        buildEntry({ side: "defending", total: 5, difficulty: 5 }),
+      ),
     ).toBe("Awareness: 5 vs 5 (defending) → Success");
   });
 });

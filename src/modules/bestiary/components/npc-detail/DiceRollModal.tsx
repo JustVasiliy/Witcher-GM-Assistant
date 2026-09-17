@@ -56,8 +56,7 @@ function RollForm({ label, skill, base, side, onClose }: RollFormProps) {
     rollResult !== "" && !Number.isNaN(rollValue) ? base + rollValue : base;
 
   const difficultyValue = Number(difficulty);
-  const isDifficultyValid =
-    difficulty !== "" && !Number.isNaN(difficultyValue);
+  const isDifficultyValid = difficulty !== "" && !Number.isNaN(difficultyValue);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
