@@ -132,6 +132,7 @@ export function SkillsCard({ creature }: SkillsCardProps) {
       {rolling && (
         <DiceRollModal
           label={rolling.skill}
+          skill={rolling.skill}
           base={rolling.base}
           onClose={() => setRolling(null)}
         />

@@ -2,7 +2,7 @@
 
 import { Button, Modal } from "@/core/ui";
 import { ActionsRow } from "./SharedCardFields.styles";
-import type { RollSide } from "./DiceRollModal";
+import type { RollSide } from "@/modules/roll-history";
 
 type SideSelectModalProps = {
   onSelect: (side: RollSide) => void;

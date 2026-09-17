@@ -26,6 +26,7 @@ export function AttacksCard({ creature }: AttacksCardProps) {
   const skills = creature.details?.skills ?? defaults.skills;
   const [rolling, setRolling] = useState<{
     label: string;
+    skill: string;
     base: number;
   } | null>(null);
 
@@ -52,6 +53,7 @@ export function AttacksCard({ creature }: AttacksCardProps) {
               onClick={() =>
                 setRolling({
                   label: attack.name || attack.skill,
+                  skill: attack.skill,
                   base: computeSkillBase(coreStats, skills, attack.skill),
                 })
               }
@@ -66,6 +68,7 @@ export function AttacksCard({ creature }: AttacksCardProps) {
       {rolling && (
         <DiceRollModal
           label={rolling.label}
+          skill={rolling.skill}
           base={rolling.base}
           onClose={() => setRolling(null)}
         />

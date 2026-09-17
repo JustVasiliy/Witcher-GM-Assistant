@@ -2,36 +2,51 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { Button, Input, Modal } from "@/core/ui";
+import { useRollHistoryStore, type RollSide } from "@/modules/roll-history";
 import { ActionsRow, Field } from "./SharedCardFields.styles";
 import { RollExpression, RollTotal } from "./DiceRollModal.styles";
 import { SideSelectModal } from "./SideSelectModal";
 
-export type RollSide = "attacking" | "defending";
-
 type DiceRollModalProps = {
   label: string;
+  skill: string;
   base: number;
   onClose: () => void;
 };
 
-export function DiceRollModal({ label, base, onClose }: DiceRollModalProps) {
+export function DiceRollModal({
+  label,
+  skill,
+  base,
+  onClose,
+}: DiceRollModalProps) {
   const [side, setSide] = useState<RollSide | null>(null);
 
   if (!side) {
     return <SideSelectModal onSelect={setSide} onClose={onClose} />;
   }
 
-  return <RollForm label={label} base={base} side={side} onClose={onClose} />;
+  return (
+    <RollForm
+      label={label}
+      skill={skill}
+      base={base}
+      side={side}
+      onClose={onClose}
+    />
+  );
 }
 
 type RollFormProps = {
   label: string;
+  skill: string;
   base: number;
   side: RollSide;
   onClose: () => void;
 };
 
-function RollForm({ label, base, side, onClose }: RollFormProps) {
+function RollForm({ label, skill, base, side, onClose }: RollFormProps) {
+  const addRoll = useRollHistoryStore((state) => state.addRoll);
   const [rollResult, setRollResult] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const difficultyId = useId();
@@ -49,13 +64,13 @@ function RollForm({ label, base, side, onClose }: RollFormProps) {
     if (!isDifficultyValid) {
       return;
     }
-    const success =
-      side === "attacking"
-        ? total > difficultyValue
-        : total >= difficultyValue;
-    console.log(
-      `${label} roll: total ${total} vs difficulty ${difficultyValue} (${side}) -> ${success ? "Success" : "Failure"}`,
-    );
+    addRoll({
+      label,
+      skill,
+      side,
+      total,
+      difficulty: difficultyValue,
+    });
     onClose();
   }
 
