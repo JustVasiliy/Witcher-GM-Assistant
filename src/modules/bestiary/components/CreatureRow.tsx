@@ -38,7 +38,12 @@ export function CreatureRow({ creature }: CreatureRowProps) {
       </Info>
       <Actions>
         {isCustom && <DeleteCustomNpcButton id={creature.id} />}
-        <Chevron aria-hidden="true">&rsaquo;</Chevron>
+        <Chevron
+          href={`/bestiary/${creature.id}`}
+          aria-label={`View ${creature.name}`}
+        >
+          &rsaquo;
+        </Chevron>
       </Actions>
     </Row>
   );

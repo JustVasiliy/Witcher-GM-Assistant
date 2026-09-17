@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Button, Input } from "@/core/ui";
+import { createCustomNpc } from "../actions";
 import type { Creature, CreatureType } from "../types";
 import { countByType, filterCreatures, pageCount, paginate } from "../utils";
 import { CreatureList } from "./CreatureList";
@@ -46,9 +47,9 @@ export function BestiaryBrowser({ creatures }: BestiaryBrowserProps) {
           <h1>Bestiary</h1>
           <p>Browse and manage creatures in your collection.</p>
         </HeaderText>
-        <Button type="button" disabled>
-          + New NPC
-        </Button>
+        <form action={createCustomNpc}>
+          <Button type="submit">+ New NPC</Button>
+        </form>
       </Header>
       <Layout>
         <Main>

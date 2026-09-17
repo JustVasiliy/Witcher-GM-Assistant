@@ -15,10 +15,16 @@ import {
 type AppShellProps = {
   user: { name?: string | null };
   headerActions?: ReactNode;
+  rightPanel?: ReactNode;
   children: ReactNode;
 };
 
-export function AppShell({ user, headerActions, children }: AppShellProps) {
+export function AppShell({
+  user,
+  headerActions,
+  rightPanel,
+  children,
+}: AppShellProps) {
   return (
     <Shell>
       <Sidebar />
@@ -32,6 +38,7 @@ export function AppShell({ user, headerActions, children }: AppShellProps) {
         </Header>
         <Content>{children}</Content>
       </Main>
+      {rightPanel}
     </Shell>
   );
 }

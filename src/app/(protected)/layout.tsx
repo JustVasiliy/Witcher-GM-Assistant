@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/core/auth/auth";
 import { AppShell } from "@/core/ui";
 import { LogoutButton } from "@/modules/auth";
+import { RollHistorySidebar } from "@/modules/roll-history";
 
 export default async function ProtectedLayout({
   children,
@@ -15,7 +16,11 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <AppShell user={session.user} headerActions={<LogoutButton />}>
+    <AppShell
+      user={session.user}
+      headerActions={<LogoutButton />}
+      rightPanel={<RollHistorySidebar />}
+    >
       {children}
     </AppShell>
   );
