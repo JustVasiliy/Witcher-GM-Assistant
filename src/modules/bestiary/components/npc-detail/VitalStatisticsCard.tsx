@@ -10,6 +10,7 @@ import type { Creature } from "../../types";
 import { EditableCard } from "./EditableCard";
 import { HpChangeModal } from "./HpChangeModal";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
+import { StaminaChangeModal } from "./StaminaChangeModal";
 import {
   ActionsRow,
   Field,
@@ -39,6 +40,7 @@ export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
     creature.details?.vitalStats ?? buildDefaultNpcDetails().vitalStats;
   const keys = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
   const [isHpModalOpen, setIsHpModalOpen] = useState(false);
+  const [isStaminaModalOpen, setIsStaminaModalOpen] = useState(false);
 
   return (
     <>
@@ -55,9 +57,10 @@ export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
                     <DamageButton
                       type="button"
                       aria-label={`Apply damage to ${VITAL_LABELS[key]}`}
-                      onClick={
-                        key === "hp" ? () => setIsHpModalOpen(true) : undefined
-                      }
+                      onClick={() => {
+                        if (key === "hp") setIsHpModalOpen(true);
+                        if (key === "stamina") setIsStaminaModalOpen(true);
+                      }}
                     >
                       +
                     </DamageButton>
@@ -80,6 +83,13 @@ export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
           creature={creature}
           vitalStats={vitalStats}
           onClose={() => setIsHpModalOpen(false)}
+        />
+      )}
+      {isStaminaModalOpen && (
+        <StaminaChangeModal
+          creature={creature}
+          vitalStats={vitalStats}
+          onClose={() => setIsStaminaModalOpen(false)}
         />
       )}
     </>
