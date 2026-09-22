@@ -8,6 +8,7 @@ import {
   ThemeProvider,
 } from "styled-components";
 import { theme } from "./theme";
+import { GlobalStyle } from "./GlobalStyle";
 
 export function StyledComponentsRegistry({
   children,
@@ -23,12 +24,20 @@ export function StyledComponentsRegistry({
   });
 
   if (typeof window !== "undefined") {
-    return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+    return (
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        {children}
+      </ThemeProvider>
+    );
   }
 
   return (
     <StyleSheetManager sheet={sheet.instance}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        {children}
+      </ThemeProvider>
     </StyleSheetManager>
   );
 }
