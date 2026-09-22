@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, LinkButton } from "@/core/ui";
+import { LinkButton } from "@/core/ui";
 import type { CampaignWithSessions } from "../types";
 import { formatDate, formatDateOnly } from "../utils";
 import { CampaignActionsMenu } from "./CampaignActionsMenu";
@@ -124,9 +124,11 @@ export function CampaignDetail({ campaign }: CampaignDetailProps) {
                   )}
                 </SessionInfo>
                 <SessionActions>
-                  <Button type="button" disabled>
+                  <LinkButton
+                    href={`/campaigns/${campaign.id}/sessions/${session.id}`}
+                  >
                     Open Session
-                  </Button>
+                  </LinkButton>
                   <CampaignActionsMenu
                     editHref={`/campaigns/${campaign.id}/sessions/${session.id}/edit`}
                     editLabel="Edit Session"

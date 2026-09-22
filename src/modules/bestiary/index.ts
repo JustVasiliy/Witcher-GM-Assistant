@@ -11,6 +11,9 @@ export type { CoreCreature, Creature, CreatureType, NpcDetails } from "./types";
 export { CORE_CREATURES } from "./data/core-creatures";
 export { BestiaryBrowser } from "./components/BestiaryBrowser";
 export { NpcDetailPage } from "./components/NpcDetailPage";
+// Client components must import NpcStatBlock from "./client" instead — this
+// barrel also re-exports Prisma-backed queries.ts, which breaks client bundling.
+export { NpcStatBlock } from "./components/NpcStatBlock";
 export {
   parseNpcDetails,
   SKILL_NAMES,

@@ -5,6 +5,7 @@ export { CampaignList } from "./components/CampaignList";
 export { DeleteCampaignButton } from "./components/DeleteCampaignButton";
 export { SessionForm } from "./components/SessionForm";
 export { DeleteSessionButton } from "./components/DeleteSessionButton";
+export { SessionDetail } from "./components/SessionDetail";
 export {
   createCampaign,
   createSession,
