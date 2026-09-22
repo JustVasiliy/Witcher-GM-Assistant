@@ -17,7 +17,7 @@ import {
   ReadValue,
 } from "./SharedCardFields.styles";
 
-const ARMOR_LABELS: Record<keyof ArmorLocations, string> = {
+export const ARMOR_LABELS: Record<keyof ArmorLocations, string> = {
   head: "Head",
   torso: "Torso",
   rightHand: "Right Hand",
@@ -26,7 +26,7 @@ const ARMOR_LABELS: Record<keyof ArmorLocations, string> = {
   leftLeg: "Left Leg",
 };
 
-const DEFAULT_ARMOR: ArmorLocations = {
+export const DEFAULT_ARMOR: ArmorLocations = {
   head: 0,
   torso: 0,
   rightHand: 0,
