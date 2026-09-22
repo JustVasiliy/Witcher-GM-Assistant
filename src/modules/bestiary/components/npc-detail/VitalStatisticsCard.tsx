@@ -8,7 +8,9 @@ import { buildDefaultNpcDetails } from "../../npc-defaults";
 import { VitalStatsSchema, type VitalStats } from "../../schemas";
 import type { Creature } from "../../types";
 import { EditableCard } from "./EditableCard";
+import { HpChangeModal } from "./HpChangeModal";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
+import { StaminaChangeModal } from "./StaminaChangeModal";
 import {
   ActionsRow,
   Field,
@@ -37,38 +39,60 @@ export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
   const vitalStats =
     creature.details?.vitalStats ?? buildDefaultNpcDetails().vitalStats;
   const keys = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
+  const [isHpModalOpen, setIsHpModalOpen] = useState(false);
+  const [isStaminaModalOpen, setIsStaminaModalOpen] = useState(false);
 
   return (
-    <EditableCard
-      title="Vital Statistics"
-      view={
-        <FieldGrid>
-          {keys.map((key) => (
-            <ReadRow key={key}>
-              <ReadLabel>{VITAL_LABELS[key]}</ReadLabel>
-              <ReadValue>
-                {vitalStats[key]}
-                {DAMAGEABLE_VITALS.includes(key) && (
-                  <DamageButton
-                    type="button"
-                    aria-label={`Apply damage to ${VITAL_LABELS[key]}`}
-                  >
-                    +
-                  </DamageButton>
-                )}
-              </ReadValue>
-            </ReadRow>
-          ))}
-        </FieldGrid>
-      }
-      renderEdit={({ cancel }) => (
-        <VitalStatisticsForm
+    <>
+      <EditableCard
+        title="Vital Statistics"
+        view={
+          <FieldGrid>
+            {keys.map((key) => (
+              <ReadRow key={key}>
+                <ReadLabel>{VITAL_LABELS[key]}</ReadLabel>
+                <ReadValue>
+                  {vitalStats[key]}
+                  {DAMAGEABLE_VITALS.includes(key) && (
+                    <DamageButton
+                      type="button"
+                      aria-label={`Apply damage to ${VITAL_LABELS[key]}`}
+                      onClick={() => {
+                        if (key === "hp") setIsHpModalOpen(true);
+                        if (key === "stamina") setIsStaminaModalOpen(true);
+                      }}
+                    >
+                      +
+                    </DamageButton>
+                  )}
+                </ReadValue>
+              </ReadRow>
+            ))}
+          </FieldGrid>
+        }
+        renderEdit={({ cancel }) => (
+          <VitalStatisticsForm
+            creature={creature}
+            vitalStats={vitalStats}
+            onCancel={cancel}
+          />
+        )}
+      />
+      {isHpModalOpen && (
+        <HpChangeModal
           creature={creature}
           vitalStats={vitalStats}
-          onCancel={cancel}
+          onClose={() => setIsHpModalOpen(false)}
         />
       )}
-    />
+      {isStaminaModalOpen && (
+        <StaminaChangeModal
+          creature={creature}
+          vitalStats={vitalStats}
+          onClose={() => setIsStaminaModalOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
