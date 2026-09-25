@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatRollMessage } from "../formatRollMessage";
-import { useRollHistoryStore } from "../store";
+import { selectUserEntries, useRollHistoryStore } from "../store";
 import {
   Aside,
   EmptyState,
@@ -13,9 +13,18 @@ import {
   ToggleButton,
 } from "./RollHistorySidebar.styles";
 
-export function RollHistorySidebar() {
+type RollHistorySidebarProps = {
+  userId: string;
+};
+
+export function RollHistorySidebar({ userId }: RollHistorySidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const entries = useRollHistoryStore((state) => state.entries);
+  const setUser = useRollHistoryStore((state) => state.setUser);
+  const entries = useRollHistoryStore(selectUserEntries(userId));
+
+  useEffect(() => {
+    setUser(userId);
+  }, [setUser, userId]);
 
   return (
     <Aside>

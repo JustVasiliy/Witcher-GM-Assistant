@@ -19,7 +19,7 @@ export default async function ProtectedLayout({
     <AppShell
       user={session.user}
       headerActions={<LogoutButton />}
-      rightPanel={<RollHistorySidebar />}
+      rightPanel={<RollHistorySidebar userId={session.user.id} />}
     >
       {children}
     </AppShell>
