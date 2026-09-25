@@ -1,8 +1,55 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useRollHistoryStore } from "./store";
+import { selectUserEntries, useRollHistoryStore } from "./store";
+
+const USER_ID = "user-1";
+
+function currentEntries() {
+  return selectUserEntries(USER_ID)(useRollHistoryStore.getState());
+}
 
 beforeEach(() => {
-  useRollHistoryStore.setState({ entries: [] });
+  useRollHistoryStore.setState({ userId: USER_ID, entriesByUser: {} });
+});
+
+describe("useRollHistoryStore per-user scoping", () => {
+  const roll = {
+    label: "Awareness",
+    skill: "Awareness",
+    side: "attacking",
+    total: 10,
+    difficulty: 5,
+  } as const;
+
+  it("does not show one user's rolls to another user", () => {
+    useRollHistoryStore.getState().addRoll(roll);
+    useRollHistoryStore.getState().setUser("user-2");
+
+    const state = useRollHistoryStore.getState();
+    expect(selectUserEntries("user-2")(state)).toHaveLength(0);
+    expect(selectUserEntries(USER_ID)(state)).toHaveLength(1);
+  });
+
+  it("records rolls under the current user after switching", () => {
+    useRollHistoryStore.getState().setUser("user-2");
+    useRollHistoryStore.getState().addRoll(roll);
+
+    const state = useRollHistoryStore.getState();
+    expect(selectUserEntries("user-2")(state)).toHaveLength(1);
+    expect(selectUserEntries(USER_ID)(state)).toHaveLength(0);
+  });
+
+  it("ignores rolls when no user is set", () => {
+    useRollHistoryStore.setState({ userId: null });
+    useRollHistoryStore.getState().addRoll(roll);
+    expect(useRollHistoryStore.getState().entriesByUser).toEqual({});
+  });
+
+  it("returns a stable empty list for users with no rolls", () => {
+    const state = useRollHistoryStore.getState();
+    expect(selectUserEntries("nobody")(state)).toBe(
+      selectUserEntries("nobody")(state),
+    );
+  });
 });
 
 describe("useRollHistoryStore addRoll", () => {
@@ -14,7 +61,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 9,
     });
-    expect(useRollHistoryStore.getState().entries[0].success).toBe(true);
+    expect(currentEntries()[0].success).toBe(true);
   });
 
   it("fails on attacking when total equals difficulty", () => {
@@ -25,7 +72,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 10,
     });
-    expect(useRollHistoryStore.getState().entries[0].success).toBe(false);
+    expect(currentEntries()[0].success).toBe(false);
   });
 
   it("succeeds on defending when total equals difficulty", () => {
@@ -36,7 +83,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 10,
     });
-    expect(useRollHistoryStore.getState().entries[0].success).toBe(true);
+    expect(currentEntries()[0].success).toBe(true);
   });
 
   it("fails on defending when total is below difficulty", () => {
@@ -47,7 +94,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 9,
       difficulty: 10,
     });
-    expect(useRollHistoryStore.getState().entries[0].success).toBe(false);
+    expect(currentEntries()[0].success).toBe(false);
   });
 
   it("attaches a critical hit for an eligible attacking skill that clears the margin", () => {
@@ -58,7 +105,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(useRollHistoryStore.getState().entries[0].critical).toEqual({
+    expect(currentEntries()[0].critical).toEqual({
       label: "Deadly Critical Wound",
       bonusDamage: 10,
     });
@@ -72,7 +119,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(useRollHistoryStore.getState().entries[0].critical).toBeNull();
+    expect(currentEntries()[0].critical).toBeNull();
   });
 
   it("does not attach a critical hit when defending, even for an eligible skill", () => {
@@ -83,7 +130,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(useRollHistoryStore.getState().entries[0].critical).toBeNull();
+    expect(currentEntries()[0].critical).toBeNull();
   });
 
   it("orders entries newest first", () => {
@@ -101,7 +148,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 5,
     });
-    const labels = useRollHistoryStore.getState().entries.map((e) => e.label);
+    const labels = currentEntries().map((e) => e.label);
     expect(labels).toEqual(["Second", "First"]);
   });
 
@@ -115,7 +162,7 @@ describe("useRollHistoryStore addRoll", () => {
         difficulty: 5,
       });
     }
-    const entries = useRollHistoryStore.getState().entries;
+    const entries = currentEntries();
     expect(entries).toHaveLength(50);
     expect(entries[0].label).toBe("Roll 54");
     expect(entries[49].label).toBe("Roll 5");
