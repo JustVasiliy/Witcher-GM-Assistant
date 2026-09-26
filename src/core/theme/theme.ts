@@ -17,6 +17,9 @@ export const theme = {
     sm: "4px",
     md: "8px",
   },
+  transitions: {
+    base: "250ms ease-in-out",
+  },
 } as const;
 
 export type AppTheme = typeof theme;
