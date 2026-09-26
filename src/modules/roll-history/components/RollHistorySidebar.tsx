@@ -9,6 +9,7 @@ import {
   EntryItem,
   EntryList,
   Panel,
+  PanelContent,
   PanelHeading,
   ToggleButton,
 } from "./RollHistorySidebar.styles";
@@ -35,8 +36,8 @@ export function RollHistorySidebar({ userId }: RollHistorySidebarProps) {
       >
         &#127922;
       </ToggleButton>
-      {isOpen && (
-        <Panel>
+      <Panel $isOpen={isOpen} inert={!isOpen}>
+        <PanelContent>
           <PanelHeading>Roll History</PanelHeading>
           {entries.length === 0 ? (
             <EmptyState>No rolls yet.</EmptyState>
@@ -49,8 +50,8 @@ export function RollHistorySidebar({ userId }: RollHistorySidebarProps) {
               ))}
             </EntryList>
           )}
-        </Panel>
-      )}
+        </PanelContent>
+      </Panel>
     </Aside>
   );
 }

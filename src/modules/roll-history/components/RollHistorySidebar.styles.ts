@@ -3,6 +3,10 @@
 import styled from "styled-components";
 
 export const Aside = styled.aside`
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
   display: flex;
   flex-shrink: 0;
   border-left: 1px solid ${({ theme }) => theme.colors.border};
@@ -24,10 +28,22 @@ export const ToggleButton = styled.button`
   }
 `;
 
-export const Panel = styled.div`
+export const Panel = styled.div<{ $isOpen: boolean }>`
+  width: ${({ $isOpen }) => ($isOpen ? "20rem" : "0")};
+  overflow: hidden;
+  transition: width ${({ theme }) => theme.transitions.base};
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`;
+
+export const PanelContent = styled.div`
   width: 20rem;
+  height: 100%;
   padding: ${({ theme }) => theme.spacing.lg};
   overflow-y: auto;
+  overscroll-behavior: contain;
 `;
 
 export const PanelHeading = styled.h2`

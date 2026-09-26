@@ -25,7 +25,7 @@ import {
   ReadRow,
   ReadValue,
 } from "./SharedCardFields.styles";
-import { Select } from "./HeaderCard.styles";
+import { HeaderGrid, NoWrapValue, Select } from "./HeaderCard.styles";
 
 type HeaderCardProps = {
   creature: Creature;
@@ -40,26 +40,26 @@ export function HeaderCard({ creature }: HeaderCardProps) {
     <EditableCard
       title="Header"
       view={
-        <FieldGrid>
+        <HeaderGrid>
           <ReadRow>
             <ReadLabel>Name</ReadLabel>
             <ReadValue>{creature.name}</ReadValue>
           </ReadRow>
           <ReadRow>
             <ReadLabel>Threat</ReadLabel>
-            <ReadValue>
+            <NoWrapValue>
               {threatRating
                 ? `${threatRating.difficulty} / ${threatRating.complexity}`
                 : "—"}
-            </ReadValue>
+            </NoWrapValue>
           </ReadRow>
           <ReadRow>
             <ReadLabel>Bounty</ReadLabel>
-            <ReadValue>
+            <NoWrapValue>
               {bounty !== undefined ? `${bounty} Crowns` : "—"}
-            </ReadValue>
+            </NoWrapValue>
           </ReadRow>
-        </FieldGrid>
+        </HeaderGrid>
       }
       renderEdit={({ cancel }) => (
         <HeaderForm creature={creature} isCore={isCore} onCancel={cancel} />
