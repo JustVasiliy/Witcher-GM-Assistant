@@ -21,7 +21,6 @@ import { EditableCard } from "./EditableCard";
 import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
   ActionsRow,
-  Field,
   ReadLabel,
   ReadRow,
   ReadValue,
@@ -29,7 +28,11 @@ import {
 import {
   DiceButton,
   GroupHeading,
-  SearchInputWrapper,
+  SkillGroupsGrid,
+  SkillGroupsList,
+  SkillGroupTile,
+  SkillInputRow,
+  SkillInputWrapper,
 } from "./SkillsCard.styles";
 
 const STAT_LABELS: Record<string, string> = {
@@ -52,22 +55,11 @@ const SKILL_GROUPS: { stat: string; skills: readonly SkillName[] }[] = [
   { stat: "WILL", skills: WILL_SKILLS },
 ];
 
-function filterGroups(query: string) {
-  const normalized = query.trim().toLowerCase();
-  return SKILL_GROUPS.map((group) => ({
-    ...group,
-    skills: group.skills.filter((skill) =>
-      skill.toLowerCase().includes(normalized),
-    ),
-  })).filter((group) => group.skills.length > 0);
-}
-
 type SkillsCardProps = {
   creature: Creature;
 };
 
 export function SkillsCard({ creature }: SkillsCardProps) {
-  const [query, setQuery] = useState("");
   const [rolling, setRolling] = useState<{
     skill: SkillName;
     base: number;
@@ -75,58 +67,42 @@ export function SkillsCard({ creature }: SkillsCardProps) {
   const defaults = buildDefaultNpcDetails();
   const coreStats = creature.details?.coreStats ?? defaults.coreStats;
   const skills = creature.details?.skills ?? defaults.skills;
-  const visibleGroups = filterGroups(query);
 
   return (
     <>
       <EditableCard
         title="Skills"
         view={
-          <div>
-            <SearchInputWrapper>
-              <Input
-                type="search"
-                placeholder="Search skills..."
-                aria-label="Search skills"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </SearchInputWrapper>
-            {visibleGroups.map((group) => (
-              <div key={group.stat}>
-                <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
-                {group.skills.map((skill) => (
-                  <ReadRow key={skill}>
-                    <ReadLabel>{skill}</ReadLabel>
-                    <ReadValue>
-                      +{computeSkillBase(coreStats, skills, skill)}
-                      <DiceButton
-                        type="button"
-                        aria-label={`Roll ${skill}`}
-                        onClick={() =>
-                          setRolling({
-                            skill,
-                            base: computeSkillBase(coreStats, skills, skill),
-                          })
-                        }
-                      >
-                        &#127922;
-                      </DiceButton>
-                    </ReadValue>
-                  </ReadRow>
-                ))}
-              </div>
-            ))}
-          </div>
+          <SkillGroupsGrid>
+            <SkillGroupsList>
+              {SKILL_GROUPS.map((group) => (
+                <SkillGroupTile key={group.stat}>
+                  <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
+                  {group.skills.map((skill) => {
+                    const base = computeSkillBase(coreStats, skills, skill);
+                    return (
+                      <ReadRow key={skill}>
+                        <ReadLabel>{skill}</ReadLabel>
+                        <ReadValue>
+                          +{base}
+                          <DiceButton
+                            type="button"
+                            aria-label={`Roll ${skill}`}
+                            onClick={() => setRolling({ skill, base })}
+                          >
+                            &#127922;
+                          </DiceButton>
+                        </ReadValue>
+                      </ReadRow>
+                    );
+                  })}
+                </SkillGroupTile>
+              ))}
+            </SkillGroupsList>
+          </SkillGroupsGrid>
         }
         renderEdit={({ cancel }) => (
-          <SkillsForm
-            creature={creature}
-            skills={skills}
-            query={query}
-            onQueryChange={setQuery}
-            onCancel={cancel}
-          />
+          <SkillsForm creature={creature} skills={skills} onCancel={cancel} />
         )}
       />
       {rolling && (
@@ -144,18 +120,10 @@ export function SkillsCard({ creature }: SkillsCardProps) {
 type SkillsFormProps = {
   creature: Creature;
   skills: Partial<Record<SkillName, number>>;
-  query: string;
-  onQueryChange: (value: string) => void;
   onCancel: () => void;
 };
 
-function SkillsForm({
-  creature,
-  skills,
-  query,
-  onQueryChange,
-  onCancel,
-}: SkillsFormProps) {
+function SkillsForm({ creature, skills, onCancel }: SkillsFormProps) {
   const [serverError, setServerError] = useState<string | undefined>();
   const {
     register,
@@ -164,7 +132,6 @@ function SkillsForm({
   } = useForm<Record<SkillName, number | undefined>>({
     defaultValues: skills as Record<SkillName, number | undefined>,
   });
-  const visibleGroups = filterGroups(query);
 
   const onSubmit = handleSubmit(async (data) => {
     const patchSkills: Partial<Record<SkillName, number>> = {};
@@ -186,34 +153,31 @@ function SkillsForm({
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      <SearchInputWrapper>
-        <Input
-          type="search"
-          placeholder="Search skills..."
-          aria-label="Search skills"
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
-        />
-      </SearchInputWrapper>
-      {visibleGroups.map((group) => (
-        <div key={group.stat}>
-          <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
-          {group.skills.map((skill) => (
-            <Field key={skill}>
-              <label htmlFor={`skill-${skill}`}>{skill}</label>
-              <Input
-                id={`skill-${skill}`}
-                type="number"
-                placeholder="Untrained"
-                {...register(skill, {
-                  setValueAs: (value) =>
-                    value === "" ? undefined : Number(value),
-                })}
-              />
-            </Field>
+      <SkillGroupsGrid>
+        <SkillGroupsList>
+          {SKILL_GROUPS.map((group) => (
+            <SkillGroupTile key={group.stat}>
+              <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
+              {group.skills.map((skill) => (
+                <SkillInputRow key={skill}>
+                  <label htmlFor={`skill-${skill}`}>{skill}</label>
+                  <SkillInputWrapper>
+                    <Input
+                      id={`skill-${skill}`}
+                      type="number"
+                      placeholder="—"
+                      {...register(skill, {
+                        setValueAs: (value) =>
+                          value === "" ? undefined : Number(value),
+                      })}
+                    />
+                  </SkillInputWrapper>
+                </SkillInputRow>
+              ))}
+            </SkillGroupTile>
           ))}
-        </div>
-      ))}
+        </SkillGroupsList>
+      </SkillGroupsGrid>
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
