@@ -7,6 +7,7 @@ export const theme = {
     border: "#2a2a2a",
     danger: "#e0524b",
     mutedForeground: "#a3a3a3",
+    modified: "#f2c94c",
   },
   spacing: {
     sm: "0.5rem",

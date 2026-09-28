@@ -14,9 +14,10 @@ type ModalProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  wide?: boolean;
 };
 
-export function Modal({ title, onClose, children }: ModalProps) {
+export function Modal({ title, onClose, children, wide }: ModalProps) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -29,7 +30,12 @@ export function Modal({ title, onClose, children }: ModalProps) {
 
   return createPortal(
     <ModalOverlay>
-      <ModalPanel role="dialog" aria-modal="true" aria-label={title}>
+      <ModalPanel
+        $wide={wide}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
           <ModalCloseButton type="button" aria-label="Close" onClick={onClose}>

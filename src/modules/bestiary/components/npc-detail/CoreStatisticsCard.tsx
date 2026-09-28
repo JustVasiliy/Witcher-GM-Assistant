@@ -6,7 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import { CoreStatsSchema, STAT_KEYS, type CoreStats } from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
+import { useEffectiveSheet } from "../../sheet/useEffectiveSheet";
 import { EditableCard } from "./EditableCard";
+import { ModifiedValue } from "./ModifiedValue";
 import {
   ActionsRow,
   Field,
@@ -30,6 +32,7 @@ const STAT_LABELS: Record<(typeof STAT_KEYS)[number], string> = {
 
 export function CoreStatisticsCard() {
   const { coreStats } = useNpcSheet().details;
+  const effective = useEffectiveSheet();
 
   return (
     <EditableCard
@@ -39,7 +42,11 @@ export function CoreStatisticsCard() {
           {STAT_KEYS.map((key) => (
             <ReadRow key={key}>
               <ReadLabel>{STAT_LABELS[key]}</ReadLabel>
-              <ReadValue>{coreStats[key]}</ReadValue>
+              <ReadValue>
+                <ModifiedValue sources={effective.statSources(key)}>
+                  {effective.coreStats[key]}
+                </ModifiedValue>
+              </ReadValue>
             </ReadRow>
           ))}
         </FieldGrid>

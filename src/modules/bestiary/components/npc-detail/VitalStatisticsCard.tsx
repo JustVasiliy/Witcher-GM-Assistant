@@ -6,8 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import { VitalStatsSchema, type VitalStats } from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
+import { useEffectiveSheet } from "../../sheet/useEffectiveSheet";
 import { EditableCard } from "./EditableCard";
 import { HpChangeModal } from "./HpChangeModal";
+import { ModifiedValue } from "./ModifiedValue";
 import { StaminaChangeModal } from "./StaminaChangeModal";
 import {
   ActionsRow,
@@ -32,6 +34,7 @@ const VITAL_KEYS = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
 export function VitalStatisticsCard() {
   const { details, combat } = useNpcSheet();
   const { vitalStats } = details;
+  const effective = useEffectiveSheet();
   const [isHpModalOpen, setIsHpModalOpen] = useState(false);
   const [isStaminaModalOpen, setIsStaminaModalOpen] = useState(false);
 
@@ -60,9 +63,11 @@ export function VitalStatisticsCard() {
                 <ReadRow key={key}>
                   <ReadLabel>{VITAL_LABELS[key]}</ReadLabel>
                   <ReadValue>
-                    {currentValue !== undefined
-                      ? `${currentValue} / ${vitalStats[key]}`
-                      : vitalStats[key]}
+                    <ModifiedValue sources={effective.vitalSources(key)}>
+                      {currentValue !== undefined
+                        ? `${currentValue} / ${effective.vitalStats[key]}`
+                        : effective.vitalStats[key]}
+                    </ModifiedValue>
                     {onOpen && (
                       <DamageButton
                         type="button"

@@ -14,9 +14,11 @@ import {
   type SkillName,
 } from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
-import { computeSkillBase } from "../../utils";
+import { formatAmount } from "../../sheet/modifiers";
+import { useEffectiveSheet } from "../../sheet/useEffectiveSheet";
 import { DiceRollModal } from "./DiceRollModal";
 import { EditableCard } from "./EditableCard";
+import { ModifiedValue } from "./ModifiedValue";
 import {
   ActionsRow,
   ReadLabel,
@@ -58,7 +60,8 @@ export function SkillsCard() {
     skill: SkillName;
     base: number;
   } | null>(null);
-  const { coreStats, skills } = useNpcSheet().details;
+  const { skills } = useNpcSheet().details;
+  const effective = useEffectiveSheet();
 
   return (
     <>
@@ -71,12 +74,16 @@ export function SkillsCard() {
                 <SkillGroupTile key={group.stat}>
                   <GroupHeading>{STAT_LABELS[group.stat]}</GroupHeading>
                   {group.skills.map((skill) => {
-                    const base = computeSkillBase(coreStats, skills, skill);
+                    const base = effective.skillBase(skill);
                     return (
                       <ReadRow key={skill}>
                         <ReadLabel>{skill}</ReadLabel>
                         <ReadValue>
-                          +{base}
+                          <ModifiedValue
+                            sources={effective.skillSources(skill)}
+                          >
+                            {formatAmount(base)}
+                          </ModifiedValue>
                           <DiceButton
                             type="button"
                             aria-label={`Roll ${skill}`}

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { getWoundDefinition } from "./critical-wounds/catalog";
+import { WOUND_STATES } from "./critical-wounds/types";
+
 export const EncounterNameSchema = z
   .string()
   .trim()
@@ -51,3 +54,16 @@ export const AttachNoteSchema = z.object({
 });
 
 export type AttachNoteInput = z.infer<typeof AttachNoteSchema>;
+
+export const AddCriticalWoundSchema = z.object({
+  woundKey: z
+    .string()
+    .refine(
+      (key) => getWoundDefinition(key) !== undefined,
+      "Unknown critical wound.",
+    ),
+});
+
+export const SetCriticalWoundStateSchema = z.object({
+  state: z.enum(WOUND_STATES),
+});

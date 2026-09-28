@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import type { CreatureType, NpcDetails } from "../types";
+import type { SheetModifier } from "./modifiers";
 
 export type SheetPatch = {
   name?: string;
@@ -25,6 +26,8 @@ export type NpcSheet = {
   forksOnSave: boolean;
   save(patch: SheetPatch): Promise<{ error?: string } | undefined>;
   combat?: NpcCombat;
+  /** Temporary adjustments (e.g. critical wounds); display-only. */
+  modifiers?: SheetModifier[];
 };
 
 const NpcSheetContext = createContext<NpcSheet | null>(null);

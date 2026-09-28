@@ -9,3 +9,5 @@ export type { NpcCombat, NpcSheet, SheetPatch } from "./sheet/NpcSheetContext";
 export { parseNpcDetails } from "./schemas";
 export { buildDefaultNpcDetails } from "./npc-defaults";
 export type { Creature } from "./types";
+export type { SheetModifier, SheetModifierTarget } from "./sheet/modifiers";
+export type { SkillName, StatKey } from "./schemas";

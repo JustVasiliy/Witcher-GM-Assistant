@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  AddCriticalWoundSchema,
   AddNpcSchema,
   AttachNoteSchema,
   EncounterNameSchema,
   NpcInstanceNameSchema,
+  SetCriticalWoundStateSchema,
   UpdateEncounterNpcSchema,
 } from "./schemas";
 
@@ -153,5 +155,36 @@ describe("AttachNoteSchema", () => {
 
   it("rejects an empty note id", () => {
     expect(AttachNoteSchema.safeParse({ noteId: "" }).success).toBe(false);
+  });
+});
+
+describe("AddCriticalWoundSchema", () => {
+  it("accepts a catalog key", () => {
+    expect(
+      AddCriticalWoundSchema.safeParse({ woundKey: "complex.broken-ribs" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("rejects an unknown key", () => {
+    const result = AddCriticalWoundSchema.safeParse({
+      woundKey: "complex.nope",
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("Unknown critical wound.");
+  });
+});
+
+describe("SetCriticalWoundStateSchema", () => {
+  it("accepts a valid state", () => {
+    expect(
+      SetCriticalWoundStateSchema.safeParse({ state: "STABILIZED" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects an invalid state", () => {
+    expect(
+      SetCriticalWoundStateSchema.safeParse({ state: "HEALED" }).success,
+    ).toBe(false);
   });
 });
