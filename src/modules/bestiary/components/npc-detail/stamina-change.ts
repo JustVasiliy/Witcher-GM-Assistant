@@ -3,6 +3,10 @@ export function parseStaminaDelta(input: string): number | null {
   return Number(input);
 }
 
-export function applyStaminaDelta(current: number, delta: number): number {
-  return Math.max(0, current + delta);
+export function applyStaminaDelta(
+  current: number,
+  delta: number,
+  max: number,
+): number {
+  return Math.min(max, Math.max(0, current + delta));
 }

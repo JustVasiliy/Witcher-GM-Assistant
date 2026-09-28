@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, FieldError, Input } from "@/core/ui";
-import { buildDefaultNpcDetails } from "../../npc-defaults";
 import {
   BODY_SKILLS,
   CRA_SKILLS,
@@ -14,11 +13,10 @@ import {
   WILL_SKILLS,
   type SkillName,
 } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { computeSkillBase } from "../../utils";
 import { DiceRollModal } from "./DiceRollModal";
 import { EditableCard } from "./EditableCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
   ActionsRow,
   ReadLabel,
@@ -55,18 +53,12 @@ const SKILL_GROUPS: { stat: string; skills: readonly SkillName[] }[] = [
   { stat: "WILL", skills: WILL_SKILLS },
 ];
 
-type SkillsCardProps = {
-  creature: Creature;
-};
-
-export function SkillsCard({ creature }: SkillsCardProps) {
+export function SkillsCard() {
   const [rolling, setRolling] = useState<{
     skill: SkillName;
     base: number;
   } | null>(null);
-  const defaults = buildDefaultNpcDetails();
-  const coreStats = creature.details?.coreStats ?? defaults.coreStats;
-  const skills = creature.details?.skills ?? defaults.skills;
+  const { coreStats, skills } = useNpcSheet().details;
 
   return (
     <>
@@ -102,7 +94,7 @@ export function SkillsCard({ creature }: SkillsCardProps) {
           </SkillGroupsGrid>
         }
         renderEdit={({ cancel }) => (
-          <SkillsForm creature={creature} skills={skills} onCancel={cancel} />
+          <SkillsForm skills={skills} onCancel={cancel} />
         )}
       />
       {rolling && (
@@ -118,12 +110,12 @@ export function SkillsCard({ creature }: SkillsCardProps) {
 }
 
 type SkillsFormProps = {
-  creature: Creature;
   skills: Partial<Record<SkillName, number>>;
   onCancel: () => void;
 };
 
-function SkillsForm({ creature, skills, onCancel }: SkillsFormProps) {
+function SkillsForm({ skills, onCancel }: SkillsFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
   const {
     register,
@@ -143,7 +135,7 @@ function SkillsForm({ creature, skills, onCancel }: SkillsFormProps) {
         }
       }
     }
-    const result = await saveNpcDetailsPatch(creature, { skills: patchSkills });
+    const result = await sheet.save({ details: { skills: patchSkills } });
     if (result?.error) {
       setServerError(result.error);
       return;
@@ -181,11 +173,7 @@ function SkillsForm({ creature, skills, onCancel }: SkillsFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : creature.source === "core"
-              ? "Save as New NPC"
-              : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel

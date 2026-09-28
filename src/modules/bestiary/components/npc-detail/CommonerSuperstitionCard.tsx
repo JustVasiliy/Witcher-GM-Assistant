@@ -1,28 +1,22 @@
 "use client";
 
 import type { LoreExcerpt } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { LoreExcerptCard } from "./LoreExcerptCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 
-type CommonerSuperstitionCardProps = {
-  creature: Creature;
-};
-
-export function CommonerSuperstitionCard({
-  creature,
-}: CommonerSuperstitionCardProps) {
-  const flavor = creature.details?.flavor;
+export function CommonerSuperstitionCard() {
+  const sheet = useNpcSheet();
+  const { flavor } = sheet.details;
 
   return (
     <LoreExcerptCard
       title="Commoner Superstition"
       dcLabel="Education DC"
       excerpt={flavor?.commonerSuperstition}
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+      saveLabel={saveButtonLabel(sheet)}
       onSave={(data: LoreExcerpt) =>
-        saveNpcDetailsPatch(creature, {
-          flavor: { ...flavor, commonerSuperstition: data },
+        sheet.save({
+          details: { flavor: { ...flavor, commonerSuperstition: data } },
         })
       }
     />

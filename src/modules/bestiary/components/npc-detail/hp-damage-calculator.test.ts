@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ArmorLocations } from "../../schemas";
 import {
+  applyHpRecovery,
   applyPenetration,
   calculateDamage,
   calculateLocationDamage,
@@ -110,5 +111,15 @@ describe("applyPenetration", () => {
     const { results } = calculateDamage(1, zeroArmor, ["torso"], false);
     const next = applyPenetration(zeroArmor, results);
     expect(next.torso).toBe(0);
+  });
+});
+
+describe("applyHpRecovery", () => {
+  it("adds recovered points", () => {
+    expect(applyHpRecovery(5, 3, 20)).toBe(8);
+  });
+
+  it("caps at max HP", () => {
+    expect(applyHpRecovery(18, 5, 20)).toBe(20);
   });
 });

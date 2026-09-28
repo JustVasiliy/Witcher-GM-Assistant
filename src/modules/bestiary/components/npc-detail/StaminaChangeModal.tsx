@@ -2,25 +2,20 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { Button, FieldError, Input, Modal } from "@/core/ui";
-import type { VitalStats } from "../../schemas";
-import type { Creature } from "../../types";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
+import { useNpcCombat, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { applyStaminaDelta, parseStaminaDelta } from "./stamina-change";
 import { ActionsRow, Field } from "./SharedCardFields.styles";
 
 const QUICK_DELTAS = [-3, -1];
 
 type StaminaChangeModalProps = {
-  creature: Creature;
-  vitalStats: VitalStats;
   onClose: () => void;
 };
 
-export function StaminaChangeModal({
-  creature,
-  vitalStats,
-  onClose,
-}: StaminaChangeModalProps) {
+export function StaminaChangeModal({ onClose }: StaminaChangeModalProps) {
+  const sheet = useNpcSheet();
+  const { currentStamina } = useNpcCombat();
+  const maxStamina = sheet.details.vitalStats.stamina;
   const [valueInput, setValueInput] = useState("");
   const [serverError, setServerError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +28,10 @@ export function StaminaChangeModal({
     setIsSubmitting(true);
     setServerError(undefined);
 
-    const nextStamina = applyStaminaDelta(vitalStats.stamina, delta);
-    const result = await saveNpcDetailsPatch(creature, {
-      vitalStats: { ...vitalStats, stamina: nextStamina },
+    const result = await sheet.save({
+      combat: {
+        currentStamina: applyStaminaDelta(currentStamina, delta, maxStamina),
+      },
     });
 
     setIsSubmitting(false);
@@ -53,7 +49,10 @@ export function StaminaChangeModal({
   }
 
   return (
-    <Modal title={`Stamina: ${vitalStats.stamina}`} onClose={onClose}>
+    <Modal
+      title={`Stamina: ${currentStamina} / ${maxStamina}`}
+      onClose={onClose}
+    >
       <ActionsRow>
         {QUICK_DELTAS.map((delta) => (
           <Button

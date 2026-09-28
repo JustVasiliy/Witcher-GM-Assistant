@@ -1,9 +1,10 @@
 "use client";
 
-import { startTransition, useMemo, useState } from "react";
-import { FieldError, Input, Modal } from "@/core/ui";
+import { useId, useMemo, useState, useTransition } from "react";
+import { Field, FieldError, Input, Modal } from "@/core/ui";
 import type { Creature } from "@/modules/bestiary/client";
 import { addNpcToEncounter } from "../actions";
+import { AddNpcSchema, MAX_NPC_QUANTITY } from "../schemas";
 import {
   EmptyResult,
   ResultList,
@@ -28,6 +29,12 @@ export function AddNpcModal({
 }: AddNpcModalProps) {
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [quantityInput, setQuantityInput] = useState("1");
+  const [isPending, startTransition] = useTransition();
+  const quantityId = useId();
+  const quantityResult = AddNpcSchema.shape.quantity.safeParse(
+    Number(quantityInput),
+  );
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -40,6 +47,14 @@ export function AddNpcModal({
   }, [creatureCatalog, query]);
 
   function handleSelect(creature: Creature) {
+    if (isPending) {
+      return;
+    }
+    if (!quantityResult.success) {
+      setError(quantityResult.error.issues[0]?.message);
+      return;
+    }
+    const quantity = quantityResult.data;
     startTransition(async () => {
       const result = await addNpcToEncounter(
         encounterId,
@@ -47,6 +62,7 @@ export function AddNpcModal({
         sessionId,
         creature.source === "core" ? "CORE" : "CUSTOM",
         creature.id,
+        quantity,
       );
       if (result?.error) {
         setError(result.error);
@@ -59,6 +75,23 @@ export function AddNpcModal({
   return (
     <Modal title="Add NPC" onClose={onClose}>
       {error && <FieldError>{error}</FieldError>}
+      <SearchField>
+        <Field>
+          <label htmlFor={quantityId}>Quantity</label>
+          <Input
+            id={quantityId}
+            type="number"
+            min={1}
+            max={MAX_NPC_QUANTITY}
+            value={quantityInput}
+            aria-invalid={!quantityResult.success}
+            onChange={(event) => {
+              setQuantityInput(event.target.value);
+              setError(undefined);
+            }}
+          />
+        </Field>
+      </SearchField>
       <SearchField>
         <Input
           type="search"
@@ -77,6 +110,7 @@ export function AddNpcModal({
           <ResultRow
             key={`${creature.source}-${creature.id}`}
             type="button"
+            disabled={isPending}
             onClick={() => handleSelect(creature)}
           >
             {creature.name}

@@ -58,6 +58,14 @@ export function calculateDamage(
   return { results, totalHpDamage };
 }
 
+export function applyHpRecovery(
+  current: number,
+  points: number,
+  max: number,
+): number {
+  return Math.min(max, current + points);
+}
+
 export function applyPenetration(
   armor: ArmorLocations,
   results: LocationDamageResult[],

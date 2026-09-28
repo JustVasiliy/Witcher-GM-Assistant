@@ -1,26 +1,22 @@
 "use client";
 
 import type { LoreExcerpt } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { LoreExcerptCard } from "./LoreExcerptCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 
-type WitcherKnowledgeCardProps = {
-  creature: Creature;
-};
-
-export function WitcherKnowledgeCard({ creature }: WitcherKnowledgeCardProps) {
-  const flavor = creature.details?.flavor;
+export function WitcherKnowledgeCard() {
+  const sheet = useNpcSheet();
+  const { flavor } = sheet.details;
 
   return (
     <LoreExcerptCard
       title="Witcher Knowledge"
       dcLabel="Witcher Training DC"
       excerpt={flavor?.witcherKnowledge}
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+      saveLabel={saveButtonLabel(sheet)}
       onSave={(data: LoreExcerpt) =>
-        saveNpcDetailsPatch(creature, {
-          flavor: { ...flavor, witcherKnowledge: data },
+        sheet.save({
+          details: { flavor: { ...flavor, witcherKnowledge: data } },
         })
       }
     />

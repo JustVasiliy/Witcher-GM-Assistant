@@ -160,13 +160,19 @@ enum NpcSource {
 }
 
 model EncounterNpc {
-  id          String    @id @default(cuid())
-  encounterId String
-  source      NpcSource
-  creatureId  String
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  encounter   Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  encounterId    String
+  source         NpcSource
+  creatureId     String
+  name           String
+  type           CreatureType
+  details        Json
+  currentHp      Int
+  currentStamina Int
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  encounter      Encounter    @relation(fields: [encounterId], references: [id], onDelete: Cascade)
 
   @@index([encounterId])
 }

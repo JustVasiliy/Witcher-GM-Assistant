@@ -3,20 +3,16 @@
 import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
 import { LootItemSchema, type LootItem } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableListCard } from "./EditableListCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { Field } from "./SharedCardFields.styles";
 import { LootRowGrid } from "./LootCard.styles";
 
 const EMPTY_LOOT_ITEM: LootItem = { name: "", quantity: "" };
 
-type LootCardProps = {
-  creature: Creature;
-};
-
-export function LootCard({ creature }: LootCardProps) {
-  const loot = creature.details?.loot ?? [];
+export function LootCard() {
+  const sheet = useNpcSheet();
+  const { loot } = sheet.details;
 
   return (
     <EditableListCard<LootItem>
@@ -25,7 +21,7 @@ export function LootCard({ creature }: LootCardProps) {
       emptyItem={EMPTY_LOOT_ITEM}
       itemSchema={LootItemSchema}
       addLabel="+ Add Loot"
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+      saveLabel={saveButtonLabel(sheet)}
       renderView={(item) => (
         <LootRowGrid>
           <span>{item.name}</span>
@@ -33,7 +29,7 @@ export function LootCard({ creature }: LootCardProps) {
         </LootRowGrid>
       )}
       renderEditRow={(index) => <LootFields index={index} />}
-      onSave={(items) => saveNpcDetailsPatch(creature, { loot: items })}
+      onSave={(items) => sheet.save({ details: { loot: items } })}
     />
   );
 }

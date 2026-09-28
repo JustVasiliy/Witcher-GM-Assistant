@@ -133,7 +133,6 @@ export function EncounterRow({
             </Toolbar>
             <NpcTabs
               encounterNpcs={encounter.npcs}
-              creatureCatalog={creatureCatalog}
               campaignId={campaignId}
               sessionId={sessionId}
             />

@@ -6,10 +6,6 @@ export const EmptyState = styled.p`
   color: ${({ theme }) => theme.colors.mutedForeground};
 `;
 
-export const MissingState = styled.p`
-  color: ${({ theme }) => theme.colors.danger};
-`;
-
 export const TabPanel = styled.div`
   margin-top: ${({ theme }) => theme.spacing.md};
 `;

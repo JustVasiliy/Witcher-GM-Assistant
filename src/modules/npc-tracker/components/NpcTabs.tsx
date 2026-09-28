@@ -2,26 +2,25 @@
 
 import { startTransition, useState } from "react";
 import { Button, Tabs } from "@/core/ui";
-import { NpcStatBlock, type Creature } from "@/modules/bestiary/client";
-import type { EncounterNpc } from "@/generated/prisma/client";
-import { removeNpcFromEncounter } from "../actions";
 import {
-  EmptyState,
-  MissingState,
-  TabActions,
-  TabPanel,
-} from "./NpcTabs.styles";
+  buildDefaultNpcDetails,
+  NpcSheetProvider,
+  NpcStatBlock,
+  parseNpcDetails,
+  type NpcSheet,
+} from "@/modules/bestiary/client";
+import type { EncounterNpc } from "@/generated/prisma/client";
+import { removeNpcFromEncounter, updateEncounterNpc } from "../actions";
+import { EmptyState, TabActions, TabPanel } from "./NpcTabs.styles";
 
 type NpcTabsProps = {
   encounterNpcs: EncounterNpc[];
-  creatureCatalog: Creature[];
   campaignId: string;
   sessionId: string;
 };
 
 export function NpcTabs({
   encounterNpcs,
-  creatureCatalog,
   campaignId,
   sessionId,
 }: NpcTabsProps) {
@@ -33,22 +32,28 @@ export function NpcTabs({
     return <EmptyState>No NPCs added to this encounter yet.</EmptyState>;
   }
 
-  const activeEncounterNpc =
+  const active =
     encounterNpcs.find((npc) => npc.id === activeId) ?? encounterNpcs[0];
-  const activeCreature = creatureCatalog.find(
-    (creature) => creature.id === activeEncounterNpc.creatureId,
-  );
+
+  const sheet: NpcSheet = {
+    mode: "instance",
+    name: active.name,
+    type: active.type,
+    details: parseNpcDetails(active.details) ?? buildDefaultNpcDetails(),
+    forksOnSave: false,
+    combat: {
+      currentHp: active.currentHp,
+      currentStamina: active.currentStamina,
+    },
+    save: (patch) =>
+      updateEncounterNpc(active.id, campaignId, sessionId, patch),
+  };
 
   return (
     <div>
       <Tabs
-        items={encounterNpcs.map((npc) => ({
-          id: npc.id,
-          label:
-            creatureCatalog.find((creature) => creature.id === npc.creatureId)
-              ?.name ?? "Unknown NPC",
-        }))}
-        activeId={activeEncounterNpc.id}
+        items={encounterNpcs.map((npc) => ({ id: npc.id, label: npc.name }))}
+        activeId={active.id}
         onChange={setActiveId}
       />
       <TabPanel>
@@ -57,24 +62,17 @@ export function NpcTabs({
             type="button"
             onClick={() => {
               startTransition(() => {
-                removeNpcFromEncounter(
-                  activeEncounterNpc.id,
-                  campaignId,
-                  sessionId,
-                );
+                removeNpcFromEncounter(active.id, campaignId, sessionId);
               });
             }}
           >
             Remove from encounter
           </Button>
         </TabActions>
-        {activeCreature ? (
-          <NpcStatBlock creature={activeCreature} />
-        ) : (
-          <MissingState>
-            This NPC is no longer available in the bestiary.
-          </MissingState>
-        )}
+        {/* key: switching tabs resets any open card edit state */}
+        <NpcSheetProvider key={active.id} sheet={sheet}>
+          <NpcStatBlock />
+        </NpcSheetProvider>
       </TabPanel>
     </div>
   );
