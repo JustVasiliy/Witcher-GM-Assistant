@@ -3,27 +3,19 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
-import { buildDefaultNpcDetails } from "../../npc-defaults";
 import { AttackSchema, SKILL_NAMES, type Attack } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { computeSkillBase } from "../../utils";
 import { DiceRollModal } from "./DiceRollModal";
 import { EditableListCard } from "./EditableListCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { Field } from "./SharedCardFields.styles";
 import { AttackRowGrid } from "./AttacksCard.styles";
 
 const EMPTY_ATTACK: Attack = { name: "", skill: "Melee", damage: "", rof: 1 };
 
-type AttacksCardProps = {
-  creature: Creature;
-};
-
-export function AttacksCard({ creature }: AttacksCardProps) {
-  const attacks = creature.details?.attacks ?? [];
-  const defaults = buildDefaultNpcDetails();
-  const coreStats = creature.details?.coreStats ?? defaults.coreStats;
-  const skills = creature.details?.skills ?? defaults.skills;
+export function AttacksCard() {
+  const sheet = useNpcSheet();
+  const { attacks, coreStats, skills } = sheet.details;
   const [rolling, setRolling] = useState<{
     label: string;
     skill: string;
@@ -38,7 +30,7 @@ export function AttacksCard({ creature }: AttacksCardProps) {
         emptyItem={EMPTY_ATTACK}
         itemSchema={AttackSchema}
         addLabel="+ Add Attack"
-        saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+        saveLabel={saveButtonLabel(sheet)}
         renderView={(attack) => (
           <AttackRowGrid>
             <span>{attack.name}</span>
@@ -63,7 +55,7 @@ export function AttacksCard({ creature }: AttacksCardProps) {
           </AttackRowGrid>
         )}
         renderEditRow={(index) => <AttackFields index={index} />}
-        onSave={(items) => saveNpcDetailsPatch(creature, { attacks: items })}
+        onSave={(items) => sheet.save({ details: { attacks: items } })}
       />
       {rolling && (
         <DiceRollModal

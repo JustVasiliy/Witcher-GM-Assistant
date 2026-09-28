@@ -3,9 +3,8 @@
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { FieldError, Input } from "@/core/ui";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableListCard } from "./EditableListCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { Field, ReadValue } from "./SharedCardFields.styles";
 
 const WeaknessItemSchema = z
@@ -13,12 +12,9 @@ const WeaknessItemSchema = z
   .trim()
   .min(1, "Weakness cannot be empty.");
 
-type WeaknessesCardProps = {
-  creature: Creature;
-};
-
-export function WeaknessesCard({ creature }: WeaknessesCardProps) {
-  const weaknesses = creature.details?.weaknesses ?? [];
+export function WeaknessesCard() {
+  const sheet = useNpcSheet();
+  const { weaknesses } = sheet.details;
 
   return (
     <EditableListCard<string>
@@ -27,10 +23,10 @@ export function WeaknessesCard({ creature }: WeaknessesCardProps) {
       emptyItem=""
       itemSchema={WeaknessItemSchema}
       addLabel="+ Add Weakness"
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+      saveLabel={saveButtonLabel(sheet)}
       renderView={(weakness) => <ReadValue>{weakness}</ReadValue>}
       renderEditRow={(index) => <WeaknessField index={index} />}
-      onSave={(items) => saveNpcDetailsPatch(creature, { weaknesses: items })}
+      onSave={(items) => sheet.save({ details: { weaknesses: items } })}
     />
   );
 }

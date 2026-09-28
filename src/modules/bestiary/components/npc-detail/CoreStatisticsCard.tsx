@@ -4,11 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
-import { buildDefaultNpcDetails } from "../../npc-defaults";
 import { CoreStatsSchema, STAT_KEYS, type CoreStats } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableCard } from "./EditableCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
   ActionsRow,
   Field,
@@ -30,13 +28,8 @@ const STAT_LABELS: Record<(typeof STAT_KEYS)[number], string> = {
   LUCK: "Luck",
 };
 
-type CoreStatisticsCardProps = {
-  creature: Creature;
-};
-
-export function CoreStatisticsCard({ creature }: CoreStatisticsCardProps) {
-  const coreStats =
-    creature.details?.coreStats ?? buildDefaultNpcDetails().coreStats;
+export function CoreStatisticsCard() {
+  const { coreStats } = useNpcSheet().details;
 
   return (
     <EditableCard
@@ -52,27 +45,19 @@ export function CoreStatisticsCard({ creature }: CoreStatisticsCardProps) {
         </FieldGrid>
       }
       renderEdit={({ cancel }) => (
-        <CoreStatisticsForm
-          creature={creature}
-          coreStats={coreStats}
-          onCancel={cancel}
-        />
+        <CoreStatisticsForm coreStats={coreStats} onCancel={cancel} />
       )}
     />
   );
 }
 
 type CoreStatisticsFormProps = {
-  creature: Creature;
   coreStats: CoreStats;
   onCancel: () => void;
 };
 
-function CoreStatisticsForm({
-  creature,
-  coreStats,
-  onCancel,
-}: CoreStatisticsFormProps) {
+function CoreStatisticsForm({ coreStats, onCancel }: CoreStatisticsFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
   const {
     register,
@@ -84,7 +69,7 @@ function CoreStatisticsForm({
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const result = await saveNpcDetailsPatch(creature, { coreStats: data });
+    const result = await sheet.save({ details: { coreStats: data } });
     if (result?.error) {
       setServerError(result.error);
       return;
@@ -111,11 +96,7 @@ function CoreStatisticsForm({
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : creature.source === "core"
-              ? "Save as New NPC"
-              : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel

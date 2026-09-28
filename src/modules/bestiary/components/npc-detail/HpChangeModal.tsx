@@ -9,16 +9,16 @@ import {
   Tabs,
   type TabItem,
 } from "@/core/ui";
-import type { ArmorLocations, VitalStats } from "../../schemas";
-import type { Creature } from "../../types";
+import type { ArmorLocations } from "../../schemas";
+import { useNpcCombat, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { ARMOR_LABELS, DEFAULT_ARMOR } from "./ArmorCard";
 import {
+  applyHpRecovery,
   applyPenetration,
   calculateDamage,
   LOCATION_DAMAGE_MODIFIERS,
   type LocationDamageResult,
 } from "./hp-damage-calculator";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { ActionsRow, Field } from "./SharedCardFields.styles";
 import {
   CheckboxRow,
@@ -40,58 +40,38 @@ const TABS: TabItem[] = [
   { id: "recovery", label: "Recovery" },
 ];
 
-function submitLabel(
-  isSubmitting: boolean,
-  isCore: boolean,
-  submittingLabel: string,
-  coreLabel: string,
-  defaultLabel: string,
-) {
-  if (isSubmitting) return submittingLabel;
-  return isCore ? coreLabel : defaultLabel;
-}
-
 type HpChangeModalProps = {
-  creature: Creature;
-  vitalStats: VitalStats;
   onClose: () => void;
 };
 
-export function HpChangeModal({
-  creature,
-  vitalStats,
-  onClose,
-}: HpChangeModalProps) {
+export function HpChangeModal({ onClose }: HpChangeModalProps) {
   const [activeTab, setActiveTab] = useState("damage");
+  const { details } = useNpcSheet();
+  const { currentHp } = useNpcCombat();
 
   return (
-    <Modal title={`HP: ${vitalStats.hp}`} onClose={onClose}>
+    <Modal
+      title={`HP: ${currentHp} / ${details.vitalStats.hp}`}
+      onClose={onClose}
+    >
       <Tabs items={TABS} activeId={activeTab} onChange={setActiveTab} />
       {activeTab === "damage" ? (
-        <DamageTab
-          creature={creature}
-          vitalStats={vitalStats}
-          onClose={onClose}
-        />
+        <DamageTab onClose={onClose} />
       ) : (
-        <RecoveryTab
-          creature={creature}
-          vitalStats={vitalStats}
-          onClose={onClose}
-        />
+        <RecoveryTab onClose={onClose} />
       )}
     </Modal>
   );
 }
 
 type TabProps = {
-  creature: Creature;
-  vitalStats: VitalStats;
   onClose: () => void;
 };
 
-function DamageTab({ creature, vitalStats, onClose }: TabProps) {
-  const armor = creature.details?.armor ?? DEFAULT_ARMOR;
+function DamageTab({ onClose }: TabProps) {
+  const sheet = useNpcSheet();
+  const { currentHp } = useNpcCombat();
+  const armor = sheet.details.armor ?? DEFAULT_ARMOR;
   const [selected, setSelected] = useState<Set<keyof ArmorLocations>>(
     new Set(),
   );
@@ -128,12 +108,9 @@ function DamageTab({ creature, vitalStats, onClose }: TabProps) {
     setIsSubmitting(true);
     setServerError(undefined);
 
-    const nextArmor = applyPenetration(armor, results);
-    const nextHp = Math.max(0, vitalStats.hp - totalHpDamage);
-
-    const result = await saveNpcDetailsPatch(creature, {
-      vitalStats: { ...vitalStats, hp: nextHp },
-      armor: nextArmor,
+    const result = await sheet.save({
+      details: { armor: applyPenetration(armor, results) },
+      combat: { currentHp: Math.max(0, currentHp - totalHpDamage) },
     });
 
     setIsSubmitting(false);
@@ -210,13 +187,7 @@ function DamageTab({ creature, vitalStats, onClose }: TabProps) {
             isSubmitting || !isDamageValid || selectedLocations.length === 0
           }
         >
-          {submitLabel(
-            isSubmitting,
-            creature.source === "core",
-            "Applying...",
-            "Apply as New NPC",
-            "Apply damage",
-          )}
+          {isSubmitting ? "Applying..." : "Apply damage"}
         </Button>
       </ActionsRow>
     </form>
@@ -238,7 +209,10 @@ function formatFormula(
   return `${base} = ${result.hpDamage}${penetrationNote}`;
 }
 
-function RecoveryTab({ creature, vitalStats, onClose }: TabProps) {
+function RecoveryTab({ onClose }: TabProps) {
+  const sheet = useNpcSheet();
+  const { currentHp } = useNpcCombat();
+  const maxHp = sheet.details.vitalStats.hp;
   const [pointsInput, setPointsInput] = useState("");
   const [serverError, setServerError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -255,9 +229,8 @@ function RecoveryTab({ creature, vitalStats, onClose }: TabProps) {
     setIsSubmitting(true);
     setServerError(undefined);
 
-    const nextHp = vitalStats.hp + pointsValue;
-    const result = await saveNpcDetailsPatch(creature, {
-      vitalStats: { ...vitalStats, hp: nextHp },
+    const result = await sheet.save({
+      combat: { currentHp: applyHpRecovery(currentHp, pointsValue, maxHp) },
     });
 
     setIsSubmitting(false);
@@ -271,7 +244,7 @@ function RecoveryTab({ creature, vitalStats, onClose }: TabProps) {
   return (
     <form onSubmit={handleSubmit} noValidate>
       <Field>
-        <label htmlFor={pointsId}>Points</label>
+        <label htmlFor={pointsId}>Points (max HP {maxHp})</label>
         <Input
           id={pointsId}
           type="number"
@@ -286,13 +259,7 @@ function RecoveryTab({ creature, vitalStats, onClose }: TabProps) {
 
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting || !isPointsValid}>
-          {submitLabel(
-            isSubmitting,
-            creature.source === "core",
-            "Restoring...",
-            "Restore as New NPC",
-            "Restore",
-          )}
+          {isSubmitting ? "Restoring..." : "Restore"}
         </Button>
       </ActionsRow>
     </form>

@@ -29,18 +29,18 @@ describe("parseStaminaDelta", () => {
 
 describe("applyStaminaDelta", () => {
   it("adds a positive delta", () => {
-    expect(applyStaminaDelta(10, 2)).toBe(12);
+    expect(applyStaminaDelta(10, 2, 20)).toBe(12);
   });
 
   it("subtracts a negative delta", () => {
-    expect(applyStaminaDelta(10, -3)).toBe(7);
+    expect(applyStaminaDelta(10, -3, 20)).toBe(7);
   });
 
   it("clamps the result at 0", () => {
-    expect(applyStaminaDelta(2, -5)).toBe(0);
+    expect(applyStaminaDelta(2, -5, 20)).toBe(0);
   });
 
-  it("has no upper cap", () => {
-    expect(applyStaminaDelta(100, 50)).toBe(150);
+  it("caps the result at max", () => {
+    expect(applyStaminaDelta(18, 5, 20)).toBe(20);
   });
 });

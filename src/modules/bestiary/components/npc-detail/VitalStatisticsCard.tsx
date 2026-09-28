@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
-import { buildDefaultNpcDetails } from "../../npc-defaults";
 import { VitalStatsSchema, type VitalStats } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableCard } from "./EditableCard";
 import { HpChangeModal } from "./HpChangeModal";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { StaminaChangeModal } from "./StaminaChangeModal";
 import {
   ActionsRow,
@@ -29,18 +27,25 @@ const VITAL_LABELS: Record<keyof VitalStats, string> = {
   vigor: "Vigor",
 };
 
-const DAMAGEABLE_VITALS: (keyof VitalStats)[] = ["hp", "stamina"];
+const VITAL_KEYS = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
 
-type VitalStatisticsCardProps = {
-  creature: Creature;
-};
-
-export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
-  const vitalStats =
-    creature.details?.vitalStats ?? buildDefaultNpcDetails().vitalStats;
-  const keys = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
+export function VitalStatisticsCard() {
+  const { details, combat } = useNpcSheet();
+  const { vitalStats } = details;
   const [isHpModalOpen, setIsHpModalOpen] = useState(false);
   const [isStaminaModalOpen, setIsStaminaModalOpen] = useState(false);
+
+  // Only instances (encounter NPCs) have current HP/Stamina and can take
+  // damage; a bestiary template shows plain max values.
+  const current: Partial<Record<keyof VitalStats, number>> = combat
+    ? { hp: combat.currentHp, stamina: combat.currentStamina }
+    : {};
+  const openModal: Partial<Record<keyof VitalStats, () => void>> = combat
+    ? {
+        hp: () => setIsHpModalOpen(true),
+        stamina: () => setIsStaminaModalOpen(true),
+      }
+    : {};
 
   return (
     <>
@@ -48,67 +53,56 @@ export function VitalStatisticsCard({ creature }: VitalStatisticsCardProps) {
         title="Vital Statistics"
         view={
           <FieldGrid>
-            {keys.map((key) => (
-              <ReadRow key={key}>
-                <ReadLabel>{VITAL_LABELS[key]}</ReadLabel>
-                <ReadValue>
-                  {vitalStats[key]}
-                  {DAMAGEABLE_VITALS.includes(key) && (
-                    <DamageButton
-                      type="button"
-                      aria-label={`Apply damage to ${VITAL_LABELS[key]}`}
-                      onClick={() => {
-                        if (key === "hp") setIsHpModalOpen(true);
-                        if (key === "stamina") setIsStaminaModalOpen(true);
-                      }}
-                    >
-                      +
-                    </DamageButton>
-                  )}
-                </ReadValue>
-              </ReadRow>
-            ))}
+            {VITAL_KEYS.map((key) => {
+              const currentValue = current[key];
+              const onOpen = openModal[key];
+              return (
+                <ReadRow key={key}>
+                  <ReadLabel>{VITAL_LABELS[key]}</ReadLabel>
+                  <ReadValue>
+                    {currentValue !== undefined
+                      ? `${currentValue} / ${vitalStats[key]}`
+                      : vitalStats[key]}
+                    {onOpen && (
+                      <DamageButton
+                        type="button"
+                        aria-label={`Apply damage to ${VITAL_LABELS[key]}`}
+                        onClick={onOpen}
+                      >
+                        +
+                      </DamageButton>
+                    )}
+                  </ReadValue>
+                </ReadRow>
+              );
+            })}
           </FieldGrid>
         }
         renderEdit={({ cancel }) => (
-          <VitalStatisticsForm
-            creature={creature}
-            vitalStats={vitalStats}
-            onCancel={cancel}
-          />
+          <VitalStatisticsForm vitalStats={vitalStats} onCancel={cancel} />
         )}
       />
       {isHpModalOpen && (
-        <HpChangeModal
-          creature={creature}
-          vitalStats={vitalStats}
-          onClose={() => setIsHpModalOpen(false)}
-        />
+        <HpChangeModal onClose={() => setIsHpModalOpen(false)} />
       )}
       {isStaminaModalOpen && (
-        <StaminaChangeModal
-          creature={creature}
-          vitalStats={vitalStats}
-          onClose={() => setIsStaminaModalOpen(false)}
-        />
+        <StaminaChangeModal onClose={() => setIsStaminaModalOpen(false)} />
       )}
     </>
   );
 }
 
 type VitalStatisticsFormProps = {
-  creature: Creature;
   vitalStats: VitalStats;
   onCancel: () => void;
 };
 
 function VitalStatisticsForm({
-  creature,
   vitalStats,
   onCancel,
 }: VitalStatisticsFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
-  const keys = Object.keys(VITAL_LABELS) as (keyof VitalStats)[];
   const {
     register,
     handleSubmit,
@@ -119,7 +113,8 @@ function VitalStatisticsForm({
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const result = await saveNpcDetailsPatch(creature, { vitalStats: data });
+    // Edits max values; the server clamps current HP/Stamina to the new max.
+    const result = await sheet.save({ details: { vitalStats: data } });
     if (result?.error) {
       setServerError(result.error);
       return;
@@ -130,7 +125,7 @@ function VitalStatisticsForm({
   return (
     <form onSubmit={onSubmit} noValidate>
       <FieldGrid>
-        {keys.map((key) => (
+        {VITAL_KEYS.map((key) => (
           <Field key={key}>
             <label htmlFor={`vital-${key}`}>{VITAL_LABELS[key]}</label>
             <Input
@@ -147,11 +142,7 @@ function VitalStatisticsForm({
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : creature.source === "core"
-              ? "Save as New NPC"
-              : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel

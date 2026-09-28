@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import type { Flavor } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableCard } from "./EditableCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
   ActionsRow,
   Field,
@@ -55,12 +54,8 @@ const BASIC_FLAVOR_LABELS: Record<keyof BasicFlavorInput, string> = {
   organization: "Organization",
 };
 
-type BasicFlavorCardProps = {
-  creature: Creature;
-};
-
-export function BasicFlavorCard({ creature }: BasicFlavorCardProps) {
-  const flavor = creature.details?.flavor;
+export function BasicFlavorCard() {
+  const { flavor } = useNpcSheet().details;
   const keys = Object.keys(BASIC_FLAVOR_LABELS) as (keyof BasicFlavorInput)[];
 
   return (
@@ -77,23 +72,19 @@ export function BasicFlavorCard({ creature }: BasicFlavorCardProps) {
         </FieldGrid>
       }
       renderEdit={({ cancel }) => (
-        <BasicFlavorForm
-          creature={creature}
-          flavor={flavor}
-          onCancel={cancel}
-        />
+        <BasicFlavorForm flavor={flavor} onCancel={cancel} />
       )}
     />
   );
 }
 
 type BasicFlavorFormProps = {
-  creature: Creature;
   flavor: Flavor | undefined;
   onCancel: () => void;
 };
 
-function BasicFlavorForm({ creature, flavor, onCancel }: BasicFlavorFormProps) {
+function BasicFlavorForm({ flavor, onCancel }: BasicFlavorFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
   const keys = Object.keys(BASIC_FLAVOR_LABELS) as (keyof BasicFlavorInput)[];
   const {
@@ -112,9 +103,8 @@ function BasicFlavorForm({ creature, flavor, onCancel }: BasicFlavorFormProps) {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    // Merge WITHIN flavor — see the callout above this task.
-    const result = await saveNpcDetailsPatch(creature, {
-      flavor: { ...flavor, ...data },
+    const result = await sheet.save({
+      details: { flavor: { ...flavor, ...data } },
     });
     if (result?.error) {
       setServerError(result.error);
@@ -142,11 +132,7 @@ function BasicFlavorForm({ creature, flavor, onCancel }: BasicFlavorFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : creature.source === "core"
-              ? "Save as New NPC"
-              : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel

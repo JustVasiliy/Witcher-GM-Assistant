@@ -1,9 +1,9 @@
 "use client";
 
+import { TemplateSheetProvider } from "../sheet/TemplateSheetProvider";
 import type { Creature } from "../types";
 import { DeleteCustomNpcButton } from "./DeleteCustomNpcButton";
 import { BackLink, PageHeader } from "./NpcDetailPage.styles";
-import { HeaderCard } from "./npc-detail/HeaderCard";
 import { NpcStatBlock } from "./NpcStatBlock";
 
 type NpcDetailPageProps = {
@@ -19,8 +19,9 @@ export function NpcDetailPage({ creature }: NpcDetailPageProps) {
           <DeleteCustomNpcButton id={creature.id} />
         </PageHeader>
       )}
-      <HeaderCard creature={creature} />
-      <NpcStatBlock creature={creature} />
+      <TemplateSheetProvider creature={creature}>
+        <NpcStatBlock />
+      </TemplateSheetProvider>
     </div>
   );
 }

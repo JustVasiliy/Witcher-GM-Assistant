@@ -3,20 +3,16 @@
 import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
 import { AbilitySchema, type Ability } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableListCard } from "./EditableListCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import { Field } from "./SharedCardFields.styles";
 import { AbilityRow, AbilityRowGrid } from "./AbilitiesCard.styles";
 
 const EMPTY_ABILITY: Ability = { name: "", description: "" };
 
-type AbilitiesCardProps = {
-  creature: Creature;
-};
-
-export function AbilitiesCard({ creature }: AbilitiesCardProps) {
-  const abilities = creature.details?.abilities ?? [];
+export function AbilitiesCard() {
+  const sheet = useNpcSheet();
+  const { abilities } = sheet.details;
 
   return (
     <EditableListCard<Ability>
@@ -25,7 +21,7 @@ export function AbilitiesCard({ creature }: AbilitiesCardProps) {
       emptyItem={EMPTY_ABILITY}
       itemSchema={AbilitySchema}
       addLabel="+ Add Ability"
-      saveLabel={creature.source === "core" ? "Save as New NPC" : "Save"}
+      saveLabel={saveButtonLabel(sheet)}
       renderView={(ability) => (
         <AbilityRow>
           <strong>{ability.name}</strong>
@@ -33,7 +29,7 @@ export function AbilitiesCard({ creature }: AbilitiesCardProps) {
         </AbilityRow>
       )}
       renderEditRow={(index) => <AbilityFields index={index} />}
-      onSave={(items) => saveNpcDetailsPatch(creature, { abilities: items })}
+      onSave={(items) => sheet.save({ details: { abilities: items } })}
     />
   );
 }

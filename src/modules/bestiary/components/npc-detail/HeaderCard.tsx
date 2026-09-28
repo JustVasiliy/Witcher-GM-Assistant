@@ -5,17 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import {
-  forkCoreCreature,
-  updateCustomNpcDetails,
-  updateCustomNpcName,
-} from "../../actions";
-import {
   HeaderSchema,
   THREAT_COMPLEXITIES,
   THREAT_DIFFICULTIES,
   type HeaderInput,
 } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableCard } from "./EditableCard";
 import {
   ActionsRow,
@@ -27,14 +22,9 @@ import {
 } from "./SharedCardFields.styles";
 import { HeaderGrid, NoWrapValue, Select } from "./HeaderCard.styles";
 
-type HeaderCardProps = {
-  creature: Creature;
-};
-
-export function HeaderCard({ creature }: HeaderCardProps) {
-  const isCore = creature.source === "core";
-  const threatRating = creature.details?.threatRating;
-  const bounty = creature.details?.bounty;
+export function HeaderCard() {
+  const { name, details } = useNpcSheet();
+  const { threatRating, bounty } = details;
 
   return (
     <EditableCard
@@ -43,7 +33,7 @@ export function HeaderCard({ creature }: HeaderCardProps) {
         <HeaderGrid>
           <ReadRow>
             <ReadLabel>Name</ReadLabel>
-            <ReadValue>{creature.name}</ReadValue>
+            <ReadValue>{name}</ReadValue>
           </ReadRow>
           <ReadRow>
             <ReadLabel>Threat</ReadLabel>
@@ -61,20 +51,17 @@ export function HeaderCard({ creature }: HeaderCardProps) {
           </ReadRow>
         </HeaderGrid>
       }
-      renderEdit={({ cancel }) => (
-        <HeaderForm creature={creature} isCore={isCore} onCancel={cancel} />
-      )}
+      renderEdit={({ cancel }) => <HeaderForm onCancel={cancel} />}
     />
   );
 }
 
 type HeaderFormProps = {
-  creature: Creature;
-  isCore: boolean;
   onCancel: () => void;
 };
 
-function HeaderForm({ creature, isCore, onCancel }: HeaderFormProps) {
+function HeaderForm({ onCancel }: HeaderFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
   const {
     register,
@@ -83,38 +70,22 @@ function HeaderForm({ creature, isCore, onCancel }: HeaderFormProps) {
   } = useForm<HeaderInput>({
     resolver: zodResolver(HeaderSchema),
     defaultValues: {
-      name: creature.name,
-      threatRating: creature.details?.threatRating ?? {
+      name: sheet.name,
+      threatRating: sheet.details.threatRating ?? {
         difficulty: "EASY",
         complexity: "SIMPLE",
       },
-      bounty: creature.details?.bounty ?? 0,
+      bounty: sheet.details.bounty ?? 0,
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    if (isCore) {
-      const result = await forkCoreCreature(
-        creature.id,
-        { threatRating: data.threatRating, bounty: data.bounty },
-        data.name,
-      );
-      if (result?.error) {
-        setServerError(result.error);
-      }
-      return;
-    }
-
-    const [nameResult, detailsResult] = await Promise.all([
-      updateCustomNpcName(creature.id, data.name),
-      updateCustomNpcDetails(creature.id, {
-        threatRating: data.threatRating,
-        bounty: data.bounty,
-      }),
-    ]);
-    const error = nameResult?.error ?? detailsResult?.error;
-    if (error) {
-      setServerError(error);
+    const result = await sheet.save({
+      name: data.name,
+      details: { threatRating: data.threatRating, bounty: data.bounty },
+    });
+    if (result?.error) {
+      setServerError(result.error);
       return;
     }
     onCancel();
@@ -174,7 +145,7 @@ function HeaderForm({ creature, isCore, onCancel }: HeaderFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : isCore ? "Save as New NPC" : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel

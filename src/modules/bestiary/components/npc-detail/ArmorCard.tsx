@@ -5,9 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import { ArmorLocationsSchema, type ArmorLocations } from "../../schemas";
-import type { Creature } from "../../types";
+import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { EditableCard } from "./EditableCard";
-import { saveNpcDetailsPatch } from "./saveNpcDetailsPatch";
 import {
   ActionsRow,
   Field,
@@ -35,12 +34,8 @@ export const DEFAULT_ARMOR: ArmorLocations = {
   leftLeg: 0,
 };
 
-type ArmorCardProps = {
-  creature: Creature;
-};
-
-export function ArmorCard({ creature }: ArmorCardProps) {
-  const armor = creature.details?.armor ?? DEFAULT_ARMOR;
+export function ArmorCard() {
+  const armor = useNpcSheet().details.armor ?? DEFAULT_ARMOR;
   const keys = Object.keys(ARMOR_LABELS) as (keyof ArmorLocations)[];
 
   return (
@@ -56,20 +51,18 @@ export function ArmorCard({ creature }: ArmorCardProps) {
           ))}
         </FieldGrid>
       }
-      renderEdit={({ cancel }) => (
-        <ArmorForm creature={creature} armor={armor} onCancel={cancel} />
-      )}
+      renderEdit={({ cancel }) => <ArmorForm armor={armor} onCancel={cancel} />}
     />
   );
 }
 
 type ArmorFormProps = {
-  creature: Creature;
   armor: ArmorLocations;
   onCancel: () => void;
 };
 
-function ArmorForm({ creature, armor, onCancel }: ArmorFormProps) {
+function ArmorForm({ armor, onCancel }: ArmorFormProps) {
+  const sheet = useNpcSheet();
   const [serverError, setServerError] = useState<string | undefined>();
   const keys = Object.keys(ARMOR_LABELS) as (keyof ArmorLocations)[];
   const {
@@ -82,7 +75,7 @@ function ArmorForm({ creature, armor, onCancel }: ArmorFormProps) {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const result = await saveNpcDetailsPatch(creature, { armor: data });
+    const result = await sheet.save({ details: { armor: data } });
     if (result?.error) {
       setServerError(result.error);
       return;
@@ -110,11 +103,7 @@ function ArmorForm({ creature, armor, onCancel }: ArmorFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <ActionsRow>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : creature.source === "core"
-              ? "Save as New NPC"
-              : "Save"}
+          {isSubmitting ? "Saving..." : saveButtonLabel(sheet)}
         </Button>
         <Button type="button" onClick={onCancel}>
           Cancel
