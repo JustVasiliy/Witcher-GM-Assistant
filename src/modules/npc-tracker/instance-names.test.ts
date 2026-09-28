@@ -22,9 +22,9 @@ describe("nextInstanceNames", () => {
   });
 
   it("continues from the highest existing number, leaving gaps alone", () => {
-    expect(nextInstanceNames("Bandit", ["Bandit 1", "Bandit 3"], 2)).toEqual(
-      { newNames: ["Bandit 4", "Bandit 5"] },
-    );
+    expect(nextInstanceNames("Bandit", ["Bandit 1", "Bandit 3"], 2)).toEqual({
+      newNames: ["Bandit 4", "Bandit 5"],
+    });
   });
 
   it("ignores siblings the GM renamed", () => {
