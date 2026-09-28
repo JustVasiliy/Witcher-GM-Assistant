@@ -5,7 +5,10 @@ export function listEncountersForSession(sessionId: string, userId: string) {
     where: { sessionId, session: { campaign: { userId } } },
     orderBy: { sortOrder: "asc" },
     include: {
-      npcs: { orderBy: { sortOrder: "asc" } },
+      npcs: {
+        orderBy: { sortOrder: "asc" },
+        include: { wounds: { orderBy: { createdAt: "asc" } } },
+      },
       notes: { include: { note: true }, orderBy: { note: { title: "asc" } } },
     },
   });

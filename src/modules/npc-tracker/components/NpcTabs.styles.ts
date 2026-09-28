@@ -13,5 +13,6 @@ export const TabPanel = styled.div`
 export const TabActions = styled.div`
   display: flex;
   justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing.sm};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;

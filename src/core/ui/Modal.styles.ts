@@ -13,9 +13,11 @@ export const ModalOverlay = styled.div`
   background-color: rgba(0, 0, 0, 0.6);
 `;
 
-export const ModalPanel = styled.div`
+export const ModalPanel = styled.div<{ $wide?: boolean }>`
   width: 100%;
-  max-width: 24rem;
+  max-width: ${({ $wide }) => ($wide ? "40rem" : "24rem")};
+  max-height: 90vh;
+  overflow-y: auto;
   padding: ${({ theme }) => theme.spacing.lg};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.md};

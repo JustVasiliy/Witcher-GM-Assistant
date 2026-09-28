@@ -12,3 +12,8 @@ export {
   removeNpcFromEncounter,
   updateEncounterNpc,
 } from "./encounter-npcs";
+export {
+  addCriticalWound,
+  removeCriticalWound,
+  setCriticalWoundState,
+} from "./critical-wounds";

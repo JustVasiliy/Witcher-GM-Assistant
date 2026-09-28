@@ -5,9 +5,11 @@ import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
 import { AttackSchema, SKILL_NAMES, type Attack } from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
-import { computeSkillBase } from "../../utils";
+import { formatAmount } from "../../sheet/modifiers";
+import { useEffectiveSheet } from "../../sheet/useEffectiveSheet";
 import { DiceRollModal } from "./DiceRollModal";
 import { EditableListCard } from "./EditableListCard";
+import { ModifiedValue } from "./ModifiedValue";
 import { Field } from "./SharedCardFields.styles";
 import { AttackRowGrid } from "./AttacksCard.styles";
 
@@ -15,7 +17,8 @@ const EMPTY_ATTACK: Attack = { name: "", skill: "Melee", damage: "", rof: 1 };
 
 export function AttacksCard() {
   const sheet = useNpcSheet();
-  const { attacks, coreStats, skills } = sheet.details;
+  const { attacks } = sheet.details;
+  const effective = useEffectiveSheet();
   const [rolling, setRolling] = useState<{
     label: string;
     skill: string;
@@ -38,7 +41,11 @@ export function AttacksCard() {
             <span>{attack.damage}</span>
             <span>{attack.effect ?? "—"}</span>
             <span>{attack.rof}</span>
-            <span>+{computeSkillBase(coreStats, skills, attack.skill)}</span>
+            <span>
+              <ModifiedValue sources={effective.skillSources(attack.skill)}>
+                {formatAmount(effective.skillBase(attack.skill))}
+              </ModifiedValue>
+            </span>
             <button
               type="button"
               aria-label={`Roll ${attack.name}`}
@@ -46,7 +53,7 @@ export function AttacksCard() {
                 setRolling({
                   label: attack.name || attack.skill,
                   skill: attack.skill,
-                  base: computeSkillBase(coreStats, skills, attack.skill),
+                  base: effective.skillBase(attack.skill),
                 })
               }
             >

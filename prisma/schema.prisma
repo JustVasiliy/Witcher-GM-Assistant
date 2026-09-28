@@ -173,8 +173,27 @@ model EncounterNpc {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   encounter      Encounter    @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+  wounds         EncounterNpcWound[]
 
   @@index([encounterId])
+}
+
+enum WoundState {
+  ACTIVE
+  STABILIZED
+  TREATED
+}
+
+model EncounterNpcWound {
+  id             String       @id @default(cuid())
+  encounterNpcId String
+  woundKey       String
+  state          WoundState   @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  encounterNpc   EncounterNpc @relation(fields: [encounterNpcId], references: [id], onDelete: Cascade)
+
+  @@index([encounterNpcId])
 }
 
 model EncounterNote {
