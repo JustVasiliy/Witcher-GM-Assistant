@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FieldError, Input } from "@/core/ui";
 import { ArmorLocationsSchema, type ArmorLocations } from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
+import { ARMOR_LABELS, DEFAULT_ARMOR } from "../../armor";
 import { EditableCard } from "./EditableCard";
 import {
   ActionsRow,
@@ -15,24 +16,6 @@ import {
   ReadRow,
   ReadValue,
 } from "./SharedCardFields.styles";
-
-export const ARMOR_LABELS: Record<keyof ArmorLocations, string> = {
-  head: "Head",
-  torso: "Torso",
-  rightHand: "Right Hand",
-  leftHand: "Left Hand",
-  rightLeg: "Right Leg",
-  leftLeg: "Left Leg",
-};
-
-export const DEFAULT_ARMOR: ArmorLocations = {
-  head: 0,
-  torso: 0,
-  rightHand: 0,
-  leftHand: 0,
-  rightLeg: 0,
-  leftLeg: 0,
-};
 
 export function ArmorCard() {
   const armor = useNpcSheet().details.armor ?? DEFAULT_ARMOR;

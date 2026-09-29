@@ -43,11 +43,20 @@ export function RollHistorySidebar({ userId }: RollHistorySidebarProps) {
             <EmptyState>No rolls yet.</EmptyState>
           ) : (
             <EntryList>
-              {entries.map((entry) => (
-                <EntryItem key={entry.id} $success={entry.success}>
-                  {formatRollMessage(entry)}
-                </EntryItem>
-              ))}
+              {entries.map((entry) =>
+                entry.kind === "event" ? (
+                  <EntryItem key={entry.id} $tone="event">
+                    {entry.message}
+                  </EntryItem>
+                ) : (
+                  <EntryItem
+                    key={entry.id}
+                    $tone={entry.success ? "success" : "failure"}
+                  >
+                    {formatRollMessage(entry)}
+                  </EntryItem>
+                ),
+              )}
             </EntryList>
           )}
         </PanelContent>

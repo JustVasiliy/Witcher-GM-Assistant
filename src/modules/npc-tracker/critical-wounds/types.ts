@@ -1,4 +1,5 @@
-import type { SheetModifier } from "@/modules/bestiary/client";
+import type { SheetModifierSpec } from "../sheet-modifier-helpers";
+import type { EffectKey } from "../effects/types";
 
 // Mirrors the Prisma `WoundState` enum; kept here so client code does not
 // import the generated Prisma runtime.
@@ -34,7 +35,7 @@ export const SEVERITY_BONUS_DAMAGE: Record<WoundSeverity, number> = {
   DEADLY: 10,
 };
 
-export type SheetModifierSpec = Omit<SheetModifier, "source">;
+export type { SheetModifierSpec } from "../sheet-modifier-helpers";
 
 export type WoundEffect = { text: string; modifiers: SheetModifierSpec[] };
 
@@ -47,6 +48,8 @@ export type WoundDefinition = {
   /** Full effect text, shown in the picker. */
   description: string;
   effects: Record<WoundState, WoundEffect>;
+  /** Effects activated when this wound is added (idempotent). */
+  triggersEffects?: EffectKey[];
 };
 
 export type CriticalWound = { id: string; woundKey: string; state: WoundState };

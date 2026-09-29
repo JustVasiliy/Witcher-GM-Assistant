@@ -6,7 +6,7 @@ import {
   legPenaltyTimes,
   QUARTER,
   stat,
-} from "./helpers";
+} from "../../sheet-modifier-helpers";
 
 // Difficult Critical Table. Head-wound damage, Stun saves, acid damage,
 // suffocation, bleeding and useless arms are text only.
@@ -30,6 +30,7 @@ export const DIFFICULT_WOUNDS: WoundDefinition[] = [
     name: "Skull Fracture",
     roll: "12",
     description: SKULL_FRACTURE,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: {
         text: SKULL_FRACTURE,
@@ -90,6 +91,7 @@ export const DIFFICULT_WOUNDS: WoundDefinition[] = [
     name: "Sucking Chest Wound",
     roll: "6-8",
     description: SUCKING_CHEST_WOUND,
+    triggersEffects: ["SUFFOCATION"],
     effects: {
       ACTIVE: {
         text: SUCKING_CHEST_WOUND,
@@ -111,6 +113,7 @@ export const DIFFICULT_WOUNDS: WoundDefinition[] = [
     name: "Compound Arm Fracture",
     roll: "4-5",
     description: COMPOUND_ARM_FRACTURE,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: { text: COMPOUND_ARM_FRACTURE, modifiers: [] },
       STABILIZED: { text: "That arm is useless.", modifiers: [] },
@@ -126,6 +129,7 @@ export const DIFFICULT_WOUNDS: WoundDefinition[] = [
     name: "Compound Leg Fracture",
     roll: "2-3",
     description: COMPOUND_LEG_FRACTURE,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: {
         text: COMPOUND_LEG_FRACTURE,

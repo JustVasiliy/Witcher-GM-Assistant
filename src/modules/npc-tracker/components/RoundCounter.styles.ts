@@ -22,3 +22,8 @@ export const Label = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.05em;
 `;
+
+export const ErrorText = styled.span`
+  color: ${({ theme }) => theme.colors.danger};
+  font-size: 0.875rem;
+`;

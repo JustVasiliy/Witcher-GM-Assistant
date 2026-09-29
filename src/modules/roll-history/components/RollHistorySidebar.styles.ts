@@ -67,11 +67,15 @@ export const EntryList = styled.ul`
   gap: ${({ theme }) => theme.spacing.sm};
 `;
 
-export const EntryItem = styled.li<{ $success: boolean }>`
+export const EntryItem = styled.li<{ $tone: "success" | "failure" | "event" }>`
   padding: ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.radii.sm};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ $success, theme }) =>
-    $success ? theme.colors.foreground : theme.colors.danger};
+  color: ${({ $tone, theme }) =>
+    $tone === "failure"
+      ? theme.colors.danger
+      : $tone === "event"
+        ? theme.colors.mutedForeground
+        : theme.colors.foreground};
   font-size: 0.875rem;
 `;

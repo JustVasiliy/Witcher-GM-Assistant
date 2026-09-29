@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { getWoundDefinition } from "./critical-wounds/catalog";
 import { WOUND_STATES } from "./critical-wounds/types";
+import { BODY_LOCATIONS, EFFECT_KEYS } from "./effects/types";
 
 export const EncounterNameSchema = z
   .string()
@@ -66,4 +67,19 @@ export const AddCriticalWoundSchema = z.object({
 
 export const SetCriticalWoundStateSchema = z.object({
   state: z.enum(WOUND_STATES),
+});
+
+export const EffectKeySchema = z.enum(EFFECT_KEYS);
+
+export const ToggleEffectSchema = z.object({ effectKey: EffectKeySchema });
+
+export const BodyLocationSchema = z.enum(BODY_LOCATIONS);
+
+export const SetFireLocationsSchema = z.object({
+  locations: z
+    .array(BodyLocationSchema)
+    .refine(
+      (locations) => new Set(locations).size === locations.length,
+      "Each body location can be listed once.",
+    ),
 });

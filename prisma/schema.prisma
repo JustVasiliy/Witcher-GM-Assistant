@@ -145,6 +145,7 @@ model Encounter {
   sessionId String
   name      String
   sortOrder Int            @default(0)
+  round     Int            @default(1)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   session   CampaignSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -174,6 +175,7 @@ model EncounterNpc {
   updatedAt      DateTime     @updatedAt
   encounter      Encounter    @relation(fields: [encounterId], references: [id], onDelete: Cascade)
   wounds         EncounterNpcWound[]
+  effects        EncounterNpcEffect[]
 
   @@index([encounterId])
 }
@@ -193,6 +195,18 @@ model EncounterNpcWound {
   updatedAt      DateTime     @updatedAt
   encounterNpc   EncounterNpc @relation(fields: [encounterNpcId], references: [id], onDelete: Cascade)
 
+  @@index([encounterNpcId])
+}
+
+model EncounterNpcEffect {
+  id               String       @id @default(cuid())
+  encounterNpcId   String
+  effectKey        String
+  burningLocations String[]
+  createdAt        DateTime     @default(now())
+  encounterNpc     EncounterNpc @relation(fields: [encounterNpcId], references: [id], onDelete: Cascade)
+
+  @@unique([encounterNpcId, effectKey])
   @@index([encounterNpcId])
 }
 

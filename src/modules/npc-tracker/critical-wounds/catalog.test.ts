@@ -259,3 +259,28 @@ describe("getWoundDefinition", () => {
     expect(getWoundDefinition("complex.nope")).toBeUndefined();
   });
 });
+
+describe("wound effect triggers", () => {
+  const EXPECTED_TRIGGERS: Record<string, string[]> = {
+    "complex.ruptured-spleen": ["BLEED"],
+    "difficult.skull-fracture": ["BLEED"],
+    "difficult.sucking-chest-wound": ["SUFFOCATION"],
+    "difficult.compound-arm-fracture": ["BLEED"],
+    "difficult.compound-leg-fracture": ["BLEED"],
+    "deadly.damaged-eye": ["BLEED"],
+    "deadly.heart-damage": ["BLEED"],
+    "deadly.septic-shock": ["POISON"],
+    "deadly.dismembered-arm": ["BLEED"],
+    "deadly.dismembered-leg": ["BLEED"],
+  };
+
+  it("triggers exactly the agreed effects", () => {
+    const actual = Object.fromEntries(
+      CRITICAL_WOUNDS.filter((wound) => wound.triggersEffects).map((wound) => [
+        wound.key,
+        wound.triggersEffects,
+      ]),
+    );
+    expect(actual).toEqual(EXPECTED_TRIGGERS);
+  });
+});
