@@ -8,7 +8,7 @@ import {
   statTimes,
   vital,
   vitalTimes,
-} from "./helpers";
+} from "../../sheet-modifier-helpers";
 
 // Deadly Critical Table. Death, Death saves, bleeding, poison, lost limbs
 // and prosthetics are text only. "Sight-based Awareness" applies to the
@@ -51,6 +51,7 @@ export const DEADLY_WOUNDS: WoundDefinition[] = [
     name: "Damaged Eye",
     roll: "11",
     description: DAMAGED_EYE,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: {
         text: DAMAGED_EYE,
@@ -72,6 +73,7 @@ export const DEADLY_WOUNDS: WoundDefinition[] = [
     name: "Heart Damage",
     roll: "9-10",
     description: HEART_DAMAGE,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: { text: HEART_DAMAGE, modifiers: heartDamage(QUARTER) },
       STABILIZED: {
@@ -90,6 +92,7 @@ export const DEADLY_WOUNDS: WoundDefinition[] = [
     name: "Septic Shock",
     roll: "6-8",
     description: SEPTIC_SHOCK,
+    triggersEffects: ["POISON"],
     effects: {
       ACTIVE: {
         text: SEPTIC_SHOCK,
@@ -123,6 +126,7 @@ export const DEADLY_WOUNDS: WoundDefinition[] = [
     name: "Dismembered Arm",
     roll: "4-5",
     description: DISMEMBERED_ARM,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: { text: DISMEMBERED_ARM, modifiers: [] },
       STABILIZED: { text: "That arm is useless.", modifiers: [] },
@@ -138,6 +142,7 @@ export const DEADLY_WOUNDS: WoundDefinition[] = [
     name: "Dismembered Leg",
     roll: "2-3",
     description: DISMEMBERED_LEG,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: {
         text: DISMEMBERED_LEG,

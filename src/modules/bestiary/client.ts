@@ -11,3 +11,7 @@ export { buildDefaultNpcDetails } from "./npc-defaults";
 export type { Creature } from "./types";
 export type { SheetModifier, SheetModifierTarget } from "./sheet/modifiers";
 export type { SkillName, StatKey } from "./schemas";
+export { ARMOR_LABELS, DEFAULT_ARMOR } from "./armor";
+export type { ArmorLocations } from "./schemas";
+export { formatAmount } from "./sheet/modifiers";
+export { SheetCard } from "./components/npc-detail/SheetCard";

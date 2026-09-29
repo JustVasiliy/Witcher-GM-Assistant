@@ -7,7 +7,10 @@ export function listEncountersForSession(sessionId: string, userId: string) {
     include: {
       npcs: {
         orderBy: { sortOrder: "asc" },
-        include: { wounds: { orderBy: { createdAt: "asc" } } },
+        include: {
+          wounds: { orderBy: { createdAt: "asc" } },
+          effects: { orderBy: { createdAt: "asc" } },
+        },
       },
       notes: { include: { note: true }, orderBy: { note: { title: "asc" } } },
     },

@@ -1,8 +1,7 @@
 "use server";
 
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/core/auth/auth";
 import { prisma } from "@/core/db";
 import { getWoundDefinition } from "../critical-wounds/catalog";
 import { SEVERITY_BONUS_DAMAGE } from "../critical-wounds/types";
@@ -11,15 +10,8 @@ import {
   SetCriticalWoundStateSchema,
 } from "../schemas";
 import type { ActionResult } from "../types";
+import { requireUserId } from "./require-user-id";
 import { sessionPath } from "./session-path";
-
-async function requireUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
-  return session.user.id;
-}
 
 function findOwnedWound(woundId: string, userId: string) {
   return prisma.encounterNpcWound.findFirst({
@@ -60,7 +52,9 @@ export async function addCriticalWound(
 
   // The wound's bonus damage is dealt in the same transaction, applied as an
   // atomic decrement (not a read-then-write of currentHp) so a concurrent HP
-  // write can't be lost, with a floor-at-0 clamp afterwards.
+  // write can't be lost, with a floor-at-0 clamp afterwards. Effects the
+  // wound triggers (e.g. bleeding) are activated in the same transaction; an
+  // already-active effect is left as is.
   await prisma.$transaction([
     prisma.encounterNpcWound.create({
       data: { encounterNpcId, woundKey: definition.key },
@@ -75,6 +69,17 @@ export async function addCriticalWound(
       where: { id: encounterNpcId, currentHp: { lt: 0 } },
       data: { currentHp: 0 },
     }),
+    ...(definition.triggersEffects?.length
+      ? [
+          prisma.encounterNpcEffect.createMany({
+            data: definition.triggersEffects.map((effectKey) => ({
+              encounterNpcId,
+              effectKey,
+            })),
+            skipDuplicates: true,
+          }),
+        ]
+      : []),
   ]);
 
   revalidatePath(sessionPath(campaignId, sessionId));

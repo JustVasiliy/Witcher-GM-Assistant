@@ -13,9 +13,20 @@ export type NewRollInput = {
   difficulty: number;
 };
 
-export type RollHistoryEntry = NewRollInput & {
+export type RollEntry = NewRollInput & {
+  kind: "roll";
   id: string;
   timestamp: number;
   success: boolean;
   critical: CriticalHit | null;
 };
+
+/** A plain log line, e.g. what a round advance did to encounter NPCs. */
+export type EventEntry = {
+  kind: "event";
+  id: string;
+  timestamp: number;
+  message: string;
+};
+
+export type RollHistoryEntry = RollEntry | EventEntry;

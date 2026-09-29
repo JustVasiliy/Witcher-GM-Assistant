@@ -11,7 +11,7 @@ import {
 } from "@/core/ui";
 import type { ArmorLocations } from "../../schemas";
 import { useNpcCombat, useNpcSheet } from "../../sheet/NpcSheetContext";
-import { ARMOR_LABELS, DEFAULT_ARMOR } from "./ArmorCard";
+import { ARMOR_LABELS, DEFAULT_ARMOR } from "../../armor";
 import {
   applyHpRecovery,
   applyPenetration,

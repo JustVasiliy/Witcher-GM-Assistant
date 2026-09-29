@@ -1,3 +1,4 @@
+import type { RollSide } from "@/modules/roll-history";
 import {
   SKILL_TO_STAT,
   STAT_KEYS,
@@ -19,13 +20,15 @@ export type SheetModifierTarget =
  * A temporary adjustment to a sheet value (e.g. from a critical wound).
  * Supplied by whoever renders the sheet; never saved into `details`.
  * `add` shifts the value by `value`; `multiply` scales it by `value`
- * (e.g. 0.5 to halve).
+ * (e.g. 0.5 to halve). A modifier with `side` applies only to rolls made
+ * on that side (see `rollModifiers`) and never to displayed values.
  */
 export type SheetModifier = {
   target: SheetModifierTarget;
   op: "add" | "multiply";
   value: number;
   source: string;
+  side?: RollSide;
 };
 
 export type EffectiveSheet = {
@@ -35,6 +38,10 @@ export type EffectiveSheet = {
   statSources: (key: StatKey) => string[];
   skillSources: (skill: SkillName) => string[];
   vitalSources: (key: keyof VitalStats) => string[];
+  rollModifiers: (
+    skill: SkillName,
+    side: RollSide,
+  ) => { total: number; sources: string[] };
 };
 
 const VITAL_LABELS: Record<keyof VitalStats, string> = {
@@ -101,8 +108,9 @@ function adjust(value: number, { multiplier, flat }: Adjustment): number {
  */
 export function applyModifiers(
   base: { coreStats: CoreStats; skills: SkillValues; vitalStats: VitalStats },
-  modifiers: SheetModifier[],
+  allModifiers: SheetModifier[],
 ): EffectiveSheet {
+  const modifiers = allModifiers.filter((modifier) => !modifier.side);
   const statAdjustments: Partial<Record<StatKey, Adjustment>> = {};
   const vitalAdjustments: Partial<Record<keyof VitalStats, Adjustment>> = {};
   const skillAdjustments: Partial<Record<SkillName, Adjustment>> = {};
@@ -172,5 +180,18 @@ export function applyModifiers(
       ),
     vitalSources: (key) =>
       sourcesWhere((target) => target.kind === "vital" && target.key === key),
+    rollModifiers: (skill, side) => {
+      const matching = allModifiers.filter(
+        (modifier) =>
+          modifier.side === side &&
+          modifier.op === "add" &&
+          modifier.target.kind === "skill" &&
+          modifier.target.name === skill,
+      );
+      return {
+        total: matching.reduce((sum, modifier) => sum + modifier.value, 0),
+        sources: matching.map(describeModifier),
+      };
+    },
   };
 }

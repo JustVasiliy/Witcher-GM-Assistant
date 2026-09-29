@@ -6,7 +6,7 @@ import {
   stat,
   VERBAL_COMBAT_SKILLS,
   vital,
-} from "./helpers";
+} from "../../sheet-modifier-helpers";
 
 // Complex Critical Table. Arm actions, Stun saves and bleeding are text
 // only.
@@ -74,6 +74,7 @@ export const COMPLEX_WOUNDS: WoundDefinition[] = [
     name: "Ruptured Spleen",
     roll: "9-10",
     description: RUPTURED_SPLEEN,
+    triggersEffects: ["BLEED"],
     effects: {
       ACTIVE: { text: RUPTURED_SPLEEN, modifiers: [] },
       STABILIZED: {

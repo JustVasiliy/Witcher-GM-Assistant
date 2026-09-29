@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FieldError, Input } from "@/core/ui";
-import { AttackSchema, SKILL_NAMES, type Attack } from "../../schemas";
+import {
+  AttackSchema,
+  SKILL_NAMES,
+  type Attack,
+  type SkillName,
+} from "../../schemas";
 import { saveButtonLabel, useNpcSheet } from "../../sheet/NpcSheetContext";
 import { formatAmount } from "../../sheet/modifiers";
 import { useEffectiveSheet } from "../../sheet/useEffectiveSheet";
@@ -21,7 +26,7 @@ export function AttacksCard() {
   const effective = useEffectiveSheet();
   const [rolling, setRolling] = useState<{
     label: string;
-    skill: string;
+    skill: SkillName;
     base: number;
   } | null>(null);
 

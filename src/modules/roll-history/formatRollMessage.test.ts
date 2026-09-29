@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { formatRollMessage } from "./formatRollMessage";
-import type { RollHistoryEntry } from "./types";
+import type { RollEntry } from "./types";
 
-function buildEntry(
-  overrides: Partial<RollHistoryEntry> = {},
-): RollHistoryEntry {
+function buildEntry(overrides: Partial<RollEntry> = {}): RollEntry {
   return {
+    kind: "roll",
     id: "1",
     timestamp: 0,
     label: "Awareness",

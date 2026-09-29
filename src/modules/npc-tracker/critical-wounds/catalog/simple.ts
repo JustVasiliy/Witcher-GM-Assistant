@@ -11,7 +11,7 @@ import {
   VERBAL_COMBAT_SKILLS,
   vital,
   vitalTimes,
-} from "./helpers";
+} from "../../sheet-modifier-helpers";
 
 // Simple Critical Table. Encumbrance, Critical Healing and arm actions
 // aren't sheet values, so those parts are text only.

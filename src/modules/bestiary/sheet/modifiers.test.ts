@@ -323,4 +323,49 @@ describe("applyModifiers", () => {
       expect(sheet.skillBase("Dodge/Escape")).toBe(3);
     });
   });
+
+  describe("side-scoped modifiers", () => {
+    const sided: SheetModifier[] = [
+      {
+        target: { kind: "skill", name: "Dodge/Escape" },
+        op: "add",
+        value: -3,
+        side: "defending",
+        source: "Blinded",
+      },
+      {
+        target: { kind: "skill", name: "Dodge/Escape" },
+        op: "add",
+        value: -2,
+        side: "attacking",
+        source: "Staggered",
+      },
+    ];
+
+    it("does not change displayed values or sources", () => {
+      const sheet = applyModifiers(base, sided);
+      expect(sheet.skillBase("Dodge/Escape")).toBe(10);
+      expect(sheet.skillSources("Dodge/Escape")).toEqual([]);
+    });
+
+    it("returns only the matching side from rollModifiers", () => {
+      const sheet = applyModifiers(base, sided);
+      expect(sheet.rollModifiers("Dodge/Escape", "defending")).toEqual({
+        total: -3,
+        sources: ["Blinded: Dodge/Escape −3"],
+      });
+      expect(sheet.rollModifiers("Dodge/Escape", "attacking")).toEqual({
+        total: -2,
+        sources: ["Staggered: Dodge/Escape −2"],
+      });
+    });
+
+    it("returns zero for skills without side modifiers", () => {
+      const sheet = applyModifiers(base, sided);
+      expect(sheet.rollModifiers("Melee", "attacking")).toEqual({
+        total: 0,
+        sources: [],
+      });
+    });
+  });
 });

@@ -6,6 +6,8 @@ import {
   EncounterNameSchema,
   NpcInstanceNameSchema,
   SetCriticalWoundStateSchema,
+  SetFireLocationsSchema,
+  ToggleEffectSchema,
   UpdateEncounterNpcSchema,
 } from "./schemas";
 
@@ -185,6 +187,36 @@ describe("SetCriticalWoundStateSchema", () => {
   it("rejects an invalid state", () => {
     expect(
       SetCriticalWoundStateSchema.safeParse({ state: "HEALED" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("effect schemas", () => {
+  it("accepts known effect keys only", () => {
+    expect(ToggleEffectSchema.safeParse({ effectKey: "BLEED" }).success).toBe(
+      true,
+    );
+    expect(ToggleEffectSchema.safeParse({ effectKey: "NOPE" }).success).toBe(
+      false,
+    );
+  });
+
+  it("accepts unique body locations, including none", () => {
+    expect(
+      SetFireLocationsSchema.safeParse({ locations: ["head", "torso"] })
+        .success,
+    ).toBe(true);
+    expect(SetFireLocationsSchema.safeParse({ locations: [] }).success).toBe(
+      true,
+    );
+  });
+
+  it("rejects duplicate or unknown locations", () => {
+    expect(
+      SetFireLocationsSchema.safeParse({ locations: ["head", "head"] }).success,
+    ).toBe(false);
+    expect(
+      SetFireLocationsSchema.safeParse({ locations: ["tail"] }).success,
     ).toBe(false);
   });
 });

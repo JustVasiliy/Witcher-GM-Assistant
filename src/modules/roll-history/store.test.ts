@@ -61,7 +61,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 9,
     });
-    expect(currentEntries()[0].success).toBe(true);
+    expect(currentEntries()[0]).toMatchObject({ success: true });
   });
 
   it("fails on attacking when total equals difficulty", () => {
@@ -72,7 +72,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 10,
     });
-    expect(currentEntries()[0].success).toBe(false);
+    expect(currentEntries()[0]).toMatchObject({ success: false });
   });
 
   it("succeeds on defending when total equals difficulty", () => {
@@ -83,7 +83,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 10,
     });
-    expect(currentEntries()[0].success).toBe(true);
+    expect(currentEntries()[0]).toMatchObject({ success: true });
   });
 
   it("fails on defending when total is below difficulty", () => {
@@ -94,7 +94,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 9,
       difficulty: 10,
     });
-    expect(currentEntries()[0].success).toBe(false);
+    expect(currentEntries()[0]).toMatchObject({ success: false });
   });
 
   it("attaches a critical hit for an eligible attacking skill that clears the margin", () => {
@@ -105,9 +105,8 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(currentEntries()[0].critical).toEqual({
-      label: "Deadly Critical Wound",
-      bonusDamage: 10,
+    expect(currentEntries()[0]).toMatchObject({
+      critical: { label: "Deadly Critical Wound", bonusDamage: 10 },
     });
   });
 
@@ -119,7 +118,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(currentEntries()[0].critical).toBeNull();
+    expect(currentEntries()[0]).toMatchObject({ critical: null });
   });
 
   it("does not attach a critical hit when defending, even for an eligible skill", () => {
@@ -130,7 +129,7 @@ describe("useRollHistoryStore addRoll", () => {
       total: 22,
       difficulty: 5,
     });
-    expect(currentEntries()[0].critical).toBeNull();
+    expect(currentEntries()[0]).toMatchObject({ critical: null });
   });
 
   it("orders entries newest first", () => {
@@ -148,7 +147,9 @@ describe("useRollHistoryStore addRoll", () => {
       total: 10,
       difficulty: 5,
     });
-    const labels = currentEntries().map((e) => e.label);
+    const labels = currentEntries().map((e) =>
+      e.kind === "roll" ? e.label : "",
+    );
     expect(labels).toEqual(["Second", "First"]);
   });
 
@@ -164,7 +165,56 @@ describe("useRollHistoryStore addRoll", () => {
     }
     const entries = currentEntries();
     expect(entries).toHaveLength(50);
-    expect(entries[0].label).toBe("Roll 54");
-    expect(entries[49].label).toBe("Roll 5");
+    const [first, , ...rest] = entries;
+    expect(first.kind === "roll" && first.label).toBe("Roll 54");
+    const last = rest[rest.length - 1];
+    expect(last.kind === "roll" && last.label).toBe("Roll 5");
+  });
+});
+
+describe("useRollHistoryStore addEvent", () => {
+  it("records a plain event entry for the current user", () => {
+    useRollHistoryStore.getState().addEvent("Round 2 — Ghoul: Bleed −2 HP");
+    expect(currentEntries()[0]).toMatchObject({
+      kind: "event",
+      message: "Round 2 — Ghoul: Bleed −2 HP",
+    });
+  });
+
+  it("ignores events when no user is set", () => {
+    useRollHistoryStore.setState({ userId: null });
+    useRollHistoryStore.getState().addEvent("x");
+    expect(useRollHistoryStore.getState().entriesByUser).toEqual({});
+  });
+});
+
+describe("roll history persistence migration", () => {
+  const migrate = useRollHistoryStore.persist.getOptions().migrate!;
+
+  it("tags version 1 entries as rolls", () => {
+    const v1 = {
+      entriesByUser: {
+        u: [
+          {
+            id: "1",
+            timestamp: 0,
+            label: "A",
+            skill: "Awareness",
+            side: "attacking",
+            total: 1,
+            difficulty: 1,
+            success: false,
+            critical: null,
+          },
+        ],
+      },
+    };
+    expect(migrate(v1, 1)).toEqual({
+      entriesByUser: { u: [{ ...v1.entriesByUser.u[0], kind: "roll" }] },
+    });
+  });
+
+  it("resets version 0 state", () => {
+    expect(migrate([{ label: "old" }], 0)).toEqual({ entriesByUser: {} });
   });
 });

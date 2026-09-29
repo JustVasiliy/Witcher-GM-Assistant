@@ -17,3 +17,5 @@ export {
   removeCriticalWound,
   setCriticalWoundState,
 } from "./critical-wounds";
+export { activateEffect, removeEffect, setFireLocations } from "./effects";
+export { advanceRound, decrementRound } from "./rounds";

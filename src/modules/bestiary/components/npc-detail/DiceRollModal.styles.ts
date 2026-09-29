@@ -22,3 +22,11 @@ export const RollTotal = styled.p`
     color: ${({ theme }) => theme.colors.foreground};
   }
 `;
+
+export const RollModifiers = styled.ul`
+  margin: 0 0 ${({ theme }) => theme.spacing.md};
+  padding: 0;
+  list-style: none;
+  color: ${({ theme }) => theme.colors.modified};
+  font-size: 0.875rem;
+`;

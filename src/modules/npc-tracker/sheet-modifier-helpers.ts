@@ -1,9 +1,12 @@
 import type {
+  SheetModifier,
   SheetModifierTarget,
   SkillName,
   StatKey,
 } from "@/modules/bestiary/client";
-import type { SheetModifierSpec } from "../types";
+import type { RollSide } from "@/modules/roll-history";
+
+export type SheetModifierSpec = Omit<SheetModifier, "source">;
 
 type VitalKey = Extract<SheetModifierTarget, { kind: "vital" }>["key"];
 
@@ -97,3 +100,27 @@ export const legPenaltyTimes = (value: number): SheetModifierSpec[] => [
   skillTimes("Dodge/Escape", value),
   skillTimes("Athletics", value),
 ];
+
+/** Skills used to attack with a weapon or bare hands. */
+export const ATTACK_SKILLS: readonly SkillName[] = [
+  "Brawling",
+  "Melee",
+  "Small Blades",
+  "Staff/Spear",
+  "Swordsmanship",
+  "Archery",
+  "Crossbow",
+];
+
+/** Skills used to dodge, reposition, or parry. */
+export const DEFENSE_SKILLS: readonly SkillName[] = [
+  "Dodge/Escape",
+  "Athletics",
+  ...ATTACK_SKILLS,
+];
+
+/** Marks modifiers as applying only to rolls made on `side`. */
+export const sided = (
+  side: RollSide,
+  specs: SheetModifierSpec[],
+): SheetModifierSpec[] => specs.map((spec) => ({ ...spec, side }));

@@ -34,3 +34,4 @@ export {
   computeEncumbrance,
   computeSkillBase,
 } from "./utils";
+export { ARMOR_LABELS, DEFAULT_ARMOR } from "./armor";

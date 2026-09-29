@@ -123,7 +123,12 @@ export function EncounterRow({
       {renameError && <Meta>{renameError}</Meta>}
       {isExpanded && (
         <ExpandedPanel>
-          <RoundCounter />
+          <RoundCounter
+            encounterId={encounter.id}
+            round={encounter.round}
+            campaignId={campaignId}
+            sessionId={sessionId}
+          />
           <div>
             <Toolbar>
               <SectionHeading>NPCs</SectionHeading>
